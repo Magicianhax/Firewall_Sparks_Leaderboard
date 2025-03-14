@@ -47,12 +47,12 @@ function parseOverallSheet(
   // Convert to raw data with headers
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // Extract the expected column headers
-  const headers = rawData[0] || {};
+  // Skip title row and use the second row as headers for overall sheet
+  const headers = rawData[1] || {};
   console.log(`Overall sheet headers:`, headers);
   
-  // Skip header row and process data
-  const formattedData = rawData.slice(1).map((row: any) => {
+  // Skip title and header rows for data processing
+  const formattedData = rawData.slice(2).map((row: any) => {
     // Find Address column
     const addressKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase() === 'address'
@@ -128,7 +128,7 @@ function parseWeek1Sheet(
   };
 }
 
-// Week 2 tab: Address, NFT collection, 🔥Sparks
+// Week 2 tab: Address, NFT collection, ���Sparks
 function parseWeek2Sheet(
   workbook: XLSX.WorkBook, 
   sheetName: string, 
@@ -145,12 +145,12 @@ function parseWeek2Sheet(
   // Convert to raw data with headers
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // Extract the expected column headers
-  const headers = rawData[0] || {};
+  // Skip title row and use the second row as headers for week 2
+  const headers = rawData[1] || {};
   console.log(`Week 2 sheet headers:`, headers);
   
-  // Skip header row and process data
-  const formattedData = rawData.slice(1).map((row: any) => {
+  // Skip title and header rows for data processing
+  const formattedData = rawData.slice(2).map((row: any) => {
     // Find Address column
     const addressKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase() === 'address'
