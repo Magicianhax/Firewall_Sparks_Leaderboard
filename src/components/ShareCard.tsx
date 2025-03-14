@@ -10,7 +10,6 @@ interface ShareCardProps {
 }
 
 export const ShareCard = React.forwardRef<HTMLDivElement, ShareCardProps>(({ sparks, address, rank }, ref) => {
-  // Only show first 6 and last 4 characters of address
   const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
 
   return (
@@ -24,28 +23,28 @@ export const ShareCard = React.forwardRef<HTMLDivElement, ShareCardProps>(({ spa
       <div className="absolute top-0 right-0 w-48 h-48 bg-yellow-500/10 rounded-full -translate-y-1/2 translate-x-1/2" />
       <div className="absolute bottom-0 left-0 w-32 h-32 bg-yellow-500/10 rounded-full translate-y-1/2 -translate-x-1/2" />
       
-      <div className="space-y-6 relative">
-        <h2 className="text-5xl font-bold font-serif tracking-tight">Firewall Genesis</h2>
+      <div className="space-y-8 relative">
+        <h2 className="text-6xl font-serif tracking-tight text-yellow-950 dark:text-yellow-50">Firewall Genesis</h2>
         
-        <div className="space-y-4">
+        <div className="space-y-6">
           {rank && (
             <div className="flex items-center gap-2 text-yellow-600 dark:text-yellow-400">
-              <Trophy className="w-6 h-6" />
-              <span className="text-xl font-bold">Rank #{rank}</span>
+              <Trophy className="w-7 h-7" />
+              <span className="text-2xl font-bold">Rank #{rank}</span>
             </div>
           )}
           
-          <div className="space-y-3">
-            <p className="text-4xl font-bold flex items-center gap-3">
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
               <span className="text-5xl">🔥</span>
-              <span>{sparks.toLocaleString()} Sparks</span>
-            </p>
-            <p className="text-sm opacity-80 font-mono">{truncatedAddress}</p>
+              <p className="text-4xl font-bold">{sparks.toLocaleString()} Sparks</p>
+            </div>
+            <p className="text-base opacity-80 font-mono text-yellow-800 dark:text-yellow-200">{truncatedAddress}</p>
           </div>
         </div>
       </div>
 
-      <div className="text-sm opacity-90 flex items-center gap-1.5">
+      <div className="text-base opacity-90 flex items-center gap-2 text-yellow-800 dark:text-yellow-200">
         Created with ❤️ by @magicianafk
       </div>
     </Card>
