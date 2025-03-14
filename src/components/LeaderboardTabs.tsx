@@ -8,15 +8,30 @@ interface LeaderboardData {
   sparks: number;
 }
 
-interface LeaderboardTabsProps {
-  overallData: LeaderboardData[];
-  week1Data: LeaderboardData[];
-  week2Data: LeaderboardData[];
-  week3Data: LeaderboardData[];
-  week4Data: LeaderboardData[];
+interface TabData {
+  data: LeaderboardData[];
+  totalPages: number;
 }
 
-const LeaderboardTabs = ({ overallData, week1Data, week2Data, week3Data, week4Data }: LeaderboardTabsProps) => {
+interface LeaderboardTabsProps {
+  overallData: TabData;
+  week1Data: TabData;
+  week2Data: TabData;
+  week3Data: TabData;
+  week4Data: TabData;
+  currentPage: number;
+  onPageChange: (page: number) => void;
+}
+
+const LeaderboardTabs = ({
+  overallData,
+  week1Data,
+  week2Data,
+  week3Data,
+  week4Data,
+  currentPage,
+  onPageChange
+}: LeaderboardTabsProps) => {
   const [searchTerm, setSearchTerm] = React.useState("");
 
   return (
@@ -29,10 +44,13 @@ const LeaderboardTabs = ({ overallData, week1Data, week2Data, week3Data, week4Da
         <TabsTrigger value="week4">Week 4</TabsTrigger>
       </TabsList>
       
-      <TabsContent value="overall" className="space-y-4">
+      <TabsContent value="overall">
         <LeaderboardSection
           title="Firewall Sparks Leaderboard"
-          data={overallData}
+          data={overallData.data}
+          totalPages={overallData.totalPages}
+          currentPage={currentPage}
+          onPageChange={onPageChange}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
         />
@@ -41,7 +59,10 @@ const LeaderboardTabs = ({ overallData, week1Data, week2Data, week3Data, week4Da
       <TabsContent value="week1">
         <LeaderboardSection
           title="Week 1 Leaderboard"
-          data={week1Data}
+          data={week1Data.data}
+          totalPages={week1Data.totalPages}
+          currentPage={currentPage}
+          onPageChange={onPageChange}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
         />
@@ -50,7 +71,10 @@ const LeaderboardTabs = ({ overallData, week1Data, week2Data, week3Data, week4Da
       <TabsContent value="week2">
         <LeaderboardSection
           title="Week 2 Leaderboard"
-          data={week2Data}
+          data={week2Data.data}
+          totalPages={week2Data.totalPages}
+          currentPage={currentPage}
+          onPageChange={onPageChange}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
         />
@@ -59,7 +83,10 @@ const LeaderboardTabs = ({ overallData, week1Data, week2Data, week3Data, week4Da
       <TabsContent value="week3">
         <LeaderboardSection
           title="Week 3 Leaderboard"
-          data={week3Data}
+          data={week3Data.data}
+          totalPages={week3Data.totalPages}
+          currentPage={currentPage}
+          onPageChange={onPageChange}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
         />
@@ -68,7 +95,10 @@ const LeaderboardTabs = ({ overallData, week1Data, week2Data, week3Data, week4Da
       <TabsContent value="week4">
         <LeaderboardSection
           title="Week 4 Leaderboard"
-          data={week4Data}
+          data={week4Data.data}
+          totalPages={week4Data.totalPages}
+          currentPage={currentPage}
+          onPageChange={onPageChange}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
         />

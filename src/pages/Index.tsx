@@ -7,23 +7,18 @@ import { Sparkle } from 'lucide-react';
 
 const Index = () => {
   const { toast } = useToast();
-  const [leaderboardData, setLeaderboardData] = useState<{
-    overall: LeaderboardData[];
-    week1: LeaderboardData[];
-    week2: LeaderboardData[];
-    week3: LeaderboardData[];
-    week4: LeaderboardData[];
-  }>({
-    overall: [],
-    week1: [],
-    week2: [],
-    week3: [],
-    week4: [],
+  const [currentPage, setCurrentPage] = useState(1);
+  const [leaderboardData, setLeaderboardData] = useState({
+    overall: { data: [], totalPages: 0 },
+    week1: { data: [], totalPages: 0 },
+    week2: { data: [], totalPages: 0 },
+    week3: { data: [], totalPages: 0 },
+    week4: { data: [], totalPages: 0 },
   });
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await readLeaderboardData();
+      const data = await readLeaderboardData(currentPage);
       if (data) {
         setLeaderboardData(data);
       } else {
@@ -36,7 +31,11 @@ const Index = () => {
     };
 
     fetchData();
-  }, [toast]);
+  }, [toast, currentPage]);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-b from-yellow-50 to-yellow-100 dark:from-yellow-900/10 dark:to-background">
@@ -58,6 +57,8 @@ const Index = () => {
           week2Data={leaderboardData.week2}
           week3Data={leaderboardData.week3}
           week4Data={leaderboardData.week4}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
         />
 
         <footer className="text-center text-sm text-muted-foreground mt-8">
