@@ -1,14 +1,10 @@
-
 import { useEffect, useState } from 'react';
 import LeaderboardTabs from '@/components/LeaderboardTabs';
-
-interface LeaderboardData {
-  address: string;
-  sparks: number;
-}
+import { LeaderboardData, readLeaderboardData } from '@/utils/excelUtils';
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
-  // Temporary mock data - replace with your Excel data fetching logic
+  const { toast } = useToast();
   const [leaderboardData, setLeaderboardData] = useState<{
     overall: LeaderboardData[];
     week1: LeaderboardData[];
@@ -16,32 +12,29 @@ const Index = () => {
     week3: LeaderboardData[];
     week4: LeaderboardData[];
   }>({
-    overall: [
-      { address: "0x1234...5678", sparks: 1000 },
-      { address: "0x8765...4321", sparks: 850 },
-      { address: "0x9876...5432", sparks: 750 },
-    ],
-    week1: [
-      { address: "0x1234...5678", sparks: 250 },
-      { address: "0x8765...4321", sparks: 200 },
-      { address: "0x9876...5432", sparks: 150 },
-    ],
-    week2: [
-      { address: "0x8765...4321", sparks: 300 },
-      { address: "0x1234...5678", sparks: 250 },
-      { address: "0x9876...5432", sparks: 200 },
-    ],
-    week3: [
-      { address: "0x9876...5432", sparks: 200 },
-      { address: "0x1234...5678", sparks: 250 },
-      { address: "0x8765...4321", sparks: 150 },
-    ],
-    week4: [
-      { address: "0x1234...5678", sparks: 250 },
-      { address: "0x9876...5432", sparks: 200 },
-      { address: "0x8765...4321", sparks: 200 },
-    ],
+    overall: [],
+    week1: [],
+    week2: [],
+    week3: [],
+    week4: [],
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await readLeaderboardData();
+      if (data) {
+        setLeaderboardData(data);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to load leaderboard data. Please ensure the Excel file is in the correct location.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchData();
+  }, [toast]);
 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-b from-background to-secondary">
