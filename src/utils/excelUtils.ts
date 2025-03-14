@@ -66,18 +66,18 @@ function parseSheet(
     return { data: [], totalPages: 0 };
   }
 
-  // Convert sheet data to JSON with header row option
-  const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+  // Convert sheet data to JSON with header row option and explicitly type as string[][]
+  const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as string[][];
   
   if (rawData.length < 2) {
     return { data: [], totalPages: 0 };
   }
 
-  // Get headers from first row
-  const headers = rawData[0];
-  const addressIndex = headers.findIndex((h: string) => String(h).includes('Address'));
-  const sparksIndex = headers.findIndex((h: string) => String(h).includes('🔥Sparks'));
-  const nftIndex = includeNFT ? headers.findIndex((h: string) => String(h).includes('NFT collection')) : -1;
+  // Get headers from first row - now properly typed as string[]
+  const headers = rawData[0] as string[];
+  const addressIndex = headers.findIndex(h => String(h).includes('Address'));
+  const sparksIndex = headers.findIndex(h => String(h).includes('🔥Sparks'));
+  const nftIndex = includeNFT ? headers.findIndex(h => String(h).includes('NFT collection')) : -1;
 
   // Process data starting from second row
   const processedData = rawData.slice(1).map((row: any) => {
