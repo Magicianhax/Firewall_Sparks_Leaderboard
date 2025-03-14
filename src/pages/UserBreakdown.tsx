@@ -41,22 +41,31 @@ const UserBreakdown = () => {
       const findUserInData = (weekData: any) => 
         weekData.data.find((entry: any) => entry.address === address);
 
+      const week1Data = findUserInData(data.week1);
+      const week2Data = findUserInData(data.week2);
+      const week3Data = findUserInData(data.week3);
+      const week4Data = findUserInData(data.week4);
+
+      // Calculate the total by summing up sparks from all weeks
+      const totalSparks = [week1Data, week2Data, week3Data, week4Data]
+        .reduce((total, weekData) => total + (weekData?.sparks || 0), 0);
+
       const userBreakdown = {
-        overall: findUserInData(data.overall)?.sparks || 0,
+        overall: totalSparks, // Use calculated total instead of overall data
         week1: {
-          sparks: findUserInData(data.week1)?.sparks || 0,
-          hotSlothVerification: findUserInData(data.week1)?.hotSlothVerification,
+          sparks: week1Data?.sparks || 0,
+          hotSlothVerification: week1Data?.hotSlothVerification,
         },
         week2: {
-          sparks: findUserInData(data.week2)?.sparks || 0,
-          nftCollection: findUserInData(data.week2)?.nftCollection,
+          sparks: week2Data?.sparks || 0,
+          nftCollection: week2Data?.nftCollection,
         },
         week3: {
-          sparks: findUserInData(data.week3)?.sparks || 0,
-          referralBonus: findUserInData(data.week3)?.referralBonus,
+          sparks: week3Data?.sparks || 0,
+          referralBonus: week3Data?.referralBonus,
         },
         week4: {
-          sparks: findUserInData(data.week4)?.sparks || 0,
+          sparks: week4Data?.sparks || 0,
         },
       };
 
