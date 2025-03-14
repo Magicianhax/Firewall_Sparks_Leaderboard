@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -47,7 +46,6 @@ const UserBreakdown = () => {
       const week3Data = data.week3.data.find((entry: any) => entry.address === address);
       const week4Data = data.week4.data.find((entry: any) => entry.address === address);
 
-      // Calculate rank from overall data
       const userRank = data.overall.data
         .sort((a: any, b: any) => b.sparks - a.sparks)
         .findIndex((entry: any) => entry.address === address) + 1;
@@ -158,7 +156,7 @@ const UserBreakdown = () => {
               <div className="text-sm text-muted-foreground flex items-center gap-1.5">
                 Created with <Heart className="w-4 h-4 text-red-500 fill-red-500" /> by @magicianafk
               </div>
-              <Button onClick={() => setShowShareModal(true)} className="w-full sm:w-auto">
+              <Button onClick={() => setShowShareModal(true)} className="w-full sm:w-auto bg-[#0066FF] hover:bg-[#0052CC] text-white">
                 <Share className="w-4 h-4 mr-2" />
                 Flex Your Sparks
               </Button>

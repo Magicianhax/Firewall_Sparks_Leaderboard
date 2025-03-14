@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import * as htmlToImage from 'html-to-image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -46,25 +47,31 @@ export const ShareModal = ({ open, onOpenChange, sparks, address, rank }: ShareM
     
     try {
       const dataUrl = await htmlToImage.toPng(cardRef.current);
+      const blob = await fetch(dataUrl).then(res => res.blob());
+      const file = new File([blob], 'firewall-sparks.png', { type: 'image/png' });
+      
       const tweetText = `🔥 JUST BROKE ${sparks} SPARKS IN @UseFirewall GENESIS! 🔥\n\nSitting on a massive ${sparks} Sparks and climbing! 📈\nThe grind is paying off BIG TIME. 🚀\n\nCheck your own Sparks balance on the dashboard built by @magicianafk\n\nWHO'S WITH ME FOR THE NEXT MILESTONE? 👀\n\n#FirewallGenesis`;
-      
-      // Create a Blob from the dataUrl
-      const blob = await (await fetch(dataUrl)).blob();
-      
-      // Check if Web Share API supports sharing files
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], 'firewall-sparks.png', { type: 'image/png' })] })) {
-        try {
-          await navigator.share({
-            text: tweetText,
-            files: [new File([blob], 'firewall-sparks.png', { type: 'image/png' })],
-          });
-        } catch (err) {
-          // Fallback to Twitter Web Intent if share fails
-          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, '_blank');
-        }
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          text: tweetText,
+          files: [file],
+        });
       } else {
-        // Fallback to Twitter Web Intent
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, '_blank');
+        // Open Twitter Web Intent as fallback
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+        window.open(twitterUrl, '_blank');
+        
+        // Also trigger download since we can't share the image directly
+        const link = document.createElement('a');
+        link.download = 'firewall-sparks.png';
+        link.href = dataUrl;
+        link.click();
+        
+        toast({
+          title: "Image downloaded",
+          description: "Since direct sharing isn't supported, we've downloaded the image for you to share manually.",
+        });
       }
     } catch (err) {
       toast({
@@ -86,14 +93,14 @@ export const ShareModal = ({ open, onOpenChange, sparks, address, rank }: ShareM
           <div className="flex flex-col sm:flex-row gap-3">
             <Button 
               onClick={handleDownload} 
-              className="flex-1 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white font-semibold"
+              className="flex-1"
             >
               <Download className="mr-2 h-4 w-4" />
               Download Card
             </Button>
             <Button 
               onClick={handleShare} 
-              className="flex-1 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white font-semibold"
+              className="flex-1 bg-[#0066FF] hover:bg-[#0052CC] text-white"
             >
               <Share className="mr-2 h-4 w-4" />
               Share on Twitter
