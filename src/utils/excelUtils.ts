@@ -67,41 +67,36 @@ function parseSheet(
   }
 
   // Convert sheet data to JSON with header row option
-  const rawData = XLSX.utils.sheet_to_json(sheet);
+  const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
   
-  // Process data, skipping the header row
-  const processedData = rawData.map((row: any) => {
-    let address = '';
-    let sparks = 0;
-    let nftCollection = '';
-    
-    // For overall sheet (Firewall_Sparks_Leaderboard)
-    if ('Address' in row && '🔥Sparks' in row) {
-      address = row['Address'];
-      sparks = Number(row['🔥Sparks']);
-    }
-    
-    // For week 2 sheet
-    if ('Address' in row && 'NFT collection' in row && '🔥Sparks' in row) {
-      address = row['Address'];
-      sparks = Number(row['🔥Sparks']);
-      nftCollection = row['NFT collection'];
-    }
+  if (rawData.length < 2) {
+    return { data: [], totalPages: 0 };
+  }
 
-    // Skip invalid entries
-    if (!address || isNaN(sparks)) {
-      return null;
-    }
+  // Get headers from first row
+  const headers = rawData[0];
+  const addressIndex = headers.findIndex((h: string) => String(h).includes('Address'));
+  const sparksIndex = headers.findIndex((h: string) => String(h).includes('🔥Sparks'));
+  const nftIndex = includeNFT ? headers.findIndex((h: string) => String(h).includes('NFT collection')) : -1;
+
+  // Process data starting from second row
+  const processedData = rawData.slice(1).map((row: any) => {
+    if (!row[addressIndex] || !row[sparksIndex]) return null;
+
+    const address = String(row[addressIndex]);
+    const sparks = Number(row[sparksIndex]);
+
+    if (!address || isNaN(sparks)) return null;
 
     const baseData = {
       address,
       sparks,
     };
 
-    if (includeNFT && nftCollection) {
+    if (includeNFT && nftIndex !== -1 && row[nftIndex]) {
       return {
         ...baseData,
-        nftCollection,
+        nftCollection: String(row[nftIndex]),
       };
     }
 
