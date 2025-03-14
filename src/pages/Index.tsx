@@ -3,6 +3,7 @@ import LeaderboardTabs from '@/components/LeaderboardTabs';
 import { LeaderboardData, readLeaderboardData } from '@/utils/excelUtils';
 import { useToast } from "@/components/ui/use-toast";
 import { Sparkle } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
 const Index = () => {
   const { toast } = useToast();
@@ -50,7 +51,7 @@ const Index = () => {
           </p>
         </div>
 
-        <div className="bg-yellow-500/10 dark:bg-yellow-500/5 p-4 rounded-lg border border-yellow-200/50 dark:border-yellow-500/20">
+        <Card className="p-4 bg-yellow-500/10 dark:bg-yellow-500/5 border-yellow-200/50 dark:border-yellow-500/20">
           <a 
             href="https://wn.nr/JmsDZDm" 
             target="_blank" 
@@ -59,7 +60,7 @@ const Index = () => {
           >
             🎉 Week 5 of tasks is now live! Click here to participate
           </a>
-        </div>
+        </Card>
 
         <LeaderboardTabs
           overallData={leaderboardData.overall}

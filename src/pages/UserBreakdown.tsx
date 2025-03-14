@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -83,7 +84,7 @@ const UserBreakdown = () => {
 
   return (
     <div className="min-h-screen p-3 sm:p-6 bg-gradient-to-br from-yellow-50 to-white dark:from-yellow-900/10 dark:to-background">
-      <div className="container mx-auto space-y-4 sm:space-y-8 max-w-4xl">
+      <div className="container mx-auto space-y-4 sm:space-y-6 max-w-4xl">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <Button 
             variant="ghost" 
@@ -93,12 +94,12 @@ const UserBreakdown = () => {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tighter text-yellow-900/90 dark:text-yellow-100/90 flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tighter text-yellow-900/90 dark:text-yellow-100/90">
             User Breakdown
           </h1>
         </div>
 
-        <div className="bg-yellow-500/10 dark:bg-yellow-500/5 p-4 rounded-lg border border-yellow-200/50 dark:border-yellow-500/20">
+        <Card className="p-4 bg-yellow-500/10 dark:bg-yellow-500/5 border-yellow-200/50 dark:border-yellow-500/20">
           <a 
             href="https://wn.nr/JmsDZDm" 
             target="_blank" 
@@ -107,22 +108,22 @@ const UserBreakdown = () => {
           >
             🎉 Week 5 of tasks is now live! Click here to participate
           </a>
-        </div>
+        </Card>
 
-        <Card className="p-4 sm:p-6">
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-4 border-b gap-2">
-              <span className="font-mono text-sm sm:text-base break-all">{address}</span>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-lg sm:text-xl">{breakdown.overall}</span>
-                <span className="text-yellow-500">🔥</span>
-              </div>
+        <Card className="p-6 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-4 border-b gap-2">
+            <span className="font-mono text-sm sm:text-base break-all">{address}</span>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-lg sm:text-xl">{breakdown.overall}</span>
+              <span className="text-yellow-500">🔥</span>
             </div>
+          </div>
 
+          <div className="grid gap-4 sm:grid-cols-2">
             {[1, 2, 3, 4].map((week) => {
               const weekData = breakdown[`week${week}` as keyof typeof breakdown] as WeeklyBreakdown;
               return (
-                <div key={week} className="p-3 sm:p-4 rounded-lg bg-secondary/50">
+                <Card key={week} className="p-4 bg-secondary/50">
                   <h3 className="font-semibold mb-3">Week {week}</h3>
                   <div className="space-y-2.5">
                     <div className="flex justify-between items-center">
@@ -148,19 +149,19 @@ const UserBreakdown = () => {
                       </div>
                     )}
                   </div>
-                </div>
+                </Card>
               );
             })}
+          </div>
 
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t">
-              <div className="text-sm text-muted-foreground flex items-center gap-1.5">
-                Created with <Heart className="w-4 h-4 text-red-500 fill-red-500" /> by @magicianafk
-              </div>
-              <Button onClick={() => setShowShareModal(true)} className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white font-semibold">
-                <Share className="w-4 h-4 mr-2" />
-                Flex Your Sparks
-              </Button>
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t">
+            <div className="text-sm text-muted-foreground flex items-center gap-1.5">
+              Created with <Heart className="w-4 h-4 text-red-500 fill-red-500" /> by @magicianafk
             </div>
+            <Button onClick={() => setShowShareModal(true)} className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white font-semibold">
+              <Share className="w-4 h-4 mr-2" />
+              Flex Your Sparks
+            </Button>
           </div>
         </Card>
       </div>
