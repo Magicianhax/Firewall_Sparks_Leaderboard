@@ -82,12 +82,12 @@ const UserBreakdown = () => {
   }
 
   return (
-    <div className="min-h-screen p-3 sm:p-6 bg-gradient-to-b from-yellow-50 to-yellow-100 dark:from-yellow-900/10 dark:to-background">
+    <div className="min-h-screen p-3 sm:p-6 bg-gradient-to-br from-yellow-50 to-white dark:from-yellow-900/10 dark:to-background">
       <div className="container mx-auto space-y-4 sm:space-y-8 max-w-4xl">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <Button 
             variant="ghost" 
-            onClick={() => navigate(-1)} 
+            onClick={() => navigate('/')} 
             className="hover:bg-yellow-100/50 w-fit"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
