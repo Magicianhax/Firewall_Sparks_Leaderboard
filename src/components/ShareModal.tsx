@@ -41,9 +41,38 @@ export const ShareModal = ({ open, onOpenChange, sparks, address }: ShareModalPr
     }
   };
 
-  const handleShare = () => {
-    const tweetText = `🔥 I've earned ${sparks} Sparks in @UseFirewall Genesis!\n\nLFG 🚀\n\n@magicianafk\n#FirewallGenesis`;
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, '_blank');
+  const handleShare = async () => {
+    if (!cardRef.current) return;
+    
+    try {
+      const dataUrl = await htmlToImage.toPng(cardRef.current);
+      const tweetText = `🔥 JUST BROKE ${sparks} SPARKS IN @UseFirewall GENESIS! 🔥\n\nSitting on a massive ${sparks} Sparks and climbing! 📈\nThe grind is paying off BIG TIME. 🚀\n\nCheck your own Sparks balance on the dashboard built by @magicianafk\n\nWHO'S WITH ME FOR THE NEXT MILESTONE? 👀\n\n#FirewallGenesis`;
+      
+      // Create a Blob from the dataUrl
+      const blob = await (await fetch(dataUrl)).blob();
+      
+      // Check if Web Share API supports sharing files
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], 'firewall-sparks.png', { type: 'image/png' })] })) {
+        try {
+          await navigator.share({
+            text: tweetText,
+            files: [new File([blob], 'firewall-sparks.png', { type: 'image/png' })],
+          });
+        } catch (err) {
+          // Fallback to Twitter Web Intent if share fails
+          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, '_blank');
+        }
+      } else {
+        // Fallback to Twitter Web Intent
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, '_blank');
+      }
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to share card",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
