@@ -11,9 +11,10 @@ interface ShareModalProps {
   onOpenChange: (open: boolean) => void;
   sparks: number;
   address: string;
+  rank?: number;
 }
 
-export const ShareModal = ({ open, onOpenChange, sparks, address }: ShareModalProps) => {
+export const ShareModal = ({ open, onOpenChange, sparks, address, rank }: ShareModalProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -81,18 +82,18 @@ export const ShareModal = ({ open, onOpenChange, sparks, address }: ShareModalPr
           <DialogTitle className="text-yellow-900 dark:text-yellow-100">Share Your Sparks 🔥</DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
-          <ShareCard ref={cardRef} sparks={sparks} address={address} />
+          <ShareCard ref={cardRef} sparks={sparks} address={address} rank={rank} />
           <div className="flex flex-col sm:flex-row gap-3">
             <Button 
               onClick={handleDownload} 
-              className="flex-1 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white"
+              className="flex-1 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white font-semibold"
             >
               <Download className="mr-2 h-4 w-4" />
               Download Card
             </Button>
             <Button 
               onClick={handleShare} 
-              className="flex-1 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white"
+              className="flex-1 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white font-semibold"
             >
               <Share className="mr-2 h-4 w-4" />
               Share on Twitter

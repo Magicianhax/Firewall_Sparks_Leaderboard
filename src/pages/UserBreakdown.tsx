@@ -26,6 +26,7 @@ const UserBreakdown = () => {
     week3: WeeklyBreakdown;
     week4: WeeklyBreakdown;
   } | null>(null);
+  const [data, setData] = useState<{ rank?: number } | null>(null);
 
   useEffect(() => {
     const fetchBreakdown = async () => {
@@ -68,6 +69,7 @@ const UserBreakdown = () => {
       };
 
       setBreakdown(userBreakdown);
+      setData({ rank: overallData?.rank });
     };
 
     fetchBreakdown();
@@ -92,6 +94,17 @@ const UserBreakdown = () => {
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tighter text-yellow-900/90 dark:text-yellow-100/90 flex items-center gap-2">
             User Breakdown
           </h1>
+        </div>
+
+        <div className="bg-yellow-500/10 dark:bg-yellow-500/5 p-4 rounded-lg border border-yellow-200/50 dark:border-yellow-500/20">
+          <a 
+            href="https://wn.nr/JmsDZDm" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-yellow-800 dark:text-yellow-200 hover:underline flex items-center gap-2"
+          >
+            🎉 Week 5 of tasks is now live! Click here to participate
+          </a>
         </div>
 
         <Card className="p-4 sm:p-6">
@@ -155,6 +168,7 @@ const UserBreakdown = () => {
         onOpenChange={setShowShareModal}
         sparks={breakdown.overall}
         address={address || ''}
+        rank={data?.rank}
       />
     </div>
   );
