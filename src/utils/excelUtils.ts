@@ -4,6 +4,7 @@ import * as XLSX from 'xlsx';
 export interface LeaderboardData {
   address: string;
   sparks: number;
+  nftCollection?: string; // Added for week 2
 }
 
 export interface LeaderboardResponse {
@@ -18,11 +19,11 @@ export async function readLeaderboardData(page: number = 1) {
     const workbook = XLSX.read(arrayBuffer);
 
     return {
-      overall: parseSheet(workbook, 'Firewall_Sparks_Leaderboard', page),
-      week1: parseSheet(workbook, 'week 1', page),
-      week2: parseSheet(workbook, 'week 2', page),
-      week3: parseSheet(workbook, 'week 3', page),
-      week4: parseSheet(workbook, 'week 4', page),
+      overall: parseSheet(workbook, 'Firewall_Sparks_Leaderboard', page, false),
+      week1: parseSheet(workbook, 'week 1', page, false),
+      week2: parseSheet(workbook, 'week 2', page, true),
+      week3: parseSheet(workbook, 'week 3', page, false),
+      week4: parseSheet(workbook, 'week 4', page, false),
     };
   } catch (error) {
     console.error('Error reading Excel file:', error);
@@ -30,7 +31,12 @@ export async function readLeaderboardData(page: number = 1) {
   }
 }
 
-function parseSheet(workbook: XLSX.WorkBook, sheetName: string, page: number): LeaderboardResponse {
+function parseSheet(
+  workbook: XLSX.WorkBook, 
+  sheetName: string, 
+  page: number,
+  includeNFT: boolean
+): LeaderboardResponse {
   const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
   
@@ -39,10 +45,21 @@ function parseSheet(workbook: XLSX.WorkBook, sheetName: string, page: number): L
     return { data: [], totalPages: 0 };
   }
 
-  const allData = XLSX.utils.sheet_to_json(sheet).map((row: any) => ({
-    address: row['Address'] || '',
-    sparks: Number(row['🔥Sparks']) || 0,
-  }));
+  const allData = XLSX.utils.sheet_to_json(sheet).map((row: any) => {
+    const baseData = {
+      address: row['Address'] || '',
+      sparks: Number(row['🔥Sparks']) || 0,
+    };
+
+    if (includeNFT) {
+      return {
+        ...baseData,
+        nftCollection: row['NFT collection'] || '',
+      };
+    }
+
+    return baseData;
+  });
 
   const start = (page - 1) * ITEMS_PER_PAGE;
   const end = start + ITEMS_PER_PAGE;

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Search, Sparkle } from 'lucide-react';
@@ -9,6 +8,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 interface LeaderboardEntry {
   address: string;
   sparks: number;
+  nftCollection?: string;
 }
 
 interface LeaderboardSectionProps {
@@ -71,7 +71,14 @@ const LeaderboardSection = ({
                 )}>
                   #{index + 1 + ((currentPage - 1) * 50)}
                 </span>
-                <span className="font-mono">{entry.address}</span>
+                <div className="flex flex-col">
+                  <span className="font-mono">{entry.address}</span>
+                  {entry.nftCollection && (
+                    <span className="text-sm text-muted-foreground">
+                      NFT: {entry.nftCollection}
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-semibold">{entry.sparks}</span>
