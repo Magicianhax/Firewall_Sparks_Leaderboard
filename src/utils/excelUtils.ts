@@ -66,37 +66,42 @@ function parseSheet(
     return { data: [], totalPages: 0 };
   }
 
-  // Convert sheet data to JSON with header row option and explicitly type as string[][]
-  const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as string[][];
+  // Convert sheet data to JSON with header row option
+  const rawData = XLSX.utils.sheet_to_json(sheet);
   
-  if (rawData.length < 2) {
-    return { data: [], totalPages: 0 };
-  }
+  // Process data, skipping the header row
+  const processedData = rawData.map((row: any) => {
+    let address = '';
+    let sparks = 0;
+    let nftCollection = '';
+    
+    // For overall sheet (Firewall_Sparks_Leaderboard)
+    if ('Address' in row && '🔥Sparks' in row) {
+      address = row['Address'];
+      sparks = Number(row['🔥Sparks']);
+    }
+    
+    // For week 2 sheet
+    if ('Address' in row && 'NFT collection' in row && '🔥Sparks' in row) {
+      address = row['Address'];
+      sparks = Number(row['🔥Sparks']);
+      nftCollection = row['NFT collection'];
+    }
 
-  // Get headers from first row - now properly typed as string[]
-  const headers = rawData[0] as string[];
-  const addressIndex = headers.findIndex(h => String(h).includes('Address'));
-  const sparksIndex = headers.findIndex(h => String(h).includes('🔥Sparks'));
-  const nftIndex = includeNFT ? headers.findIndex(h => String(h).includes('NFT collection')) : -1;
-
-  // Process data starting from second row
-  const processedData = rawData.slice(1).map((row: any) => {
-    if (!row[addressIndex] || !row[sparksIndex]) return null;
-
-    const address = String(row[addressIndex]);
-    const sparks = Number(row[sparksIndex]);
-
-    if (!address || isNaN(sparks)) return null;
+    // Skip invalid entries
+    if (!address || isNaN(sparks)) {
+      return null;
+    }
 
     const baseData = {
       address,
       sparks,
     };
 
-    if (includeNFT && nftIndex !== -1 && row[nftIndex]) {
+    if (includeNFT && nftCollection) {
       return {
         ...baseData,
-        nftCollection: String(row[nftIndex]),
+        nftCollection,
       };
     }
 
