@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -41,17 +40,14 @@ const UserBreakdown = () => {
       const findUserInData = (weekData: any) => 
         weekData.data.find((entry: any) => entry.address === address);
 
+      const overallData = findUserInData(data.overall);
       const week1Data = findUserInData(data.week1);
       const week2Data = findUserInData(data.week2);
       const week3Data = findUserInData(data.week3);
       const week4Data = findUserInData(data.week4);
 
-      // Calculate the total by summing up sparks from all weeks
-      const totalSparks = [week1Data, week2Data, week3Data, week4Data]
-        .reduce((total, weekData) => total + (weekData?.sparks || 0), 0);
-
       const userBreakdown = {
-        overall: totalSparks, // Use calculated total instead of overall data
+        overall: overallData?.sparks || 0,
         week1: {
           sparks: week1Data?.sparks || 0,
           hotSlothVerification: week1Data?.hotSlothVerification,
