@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -26,7 +27,7 @@ const UserBreakdown = () => {
     week3: WeeklyBreakdown;
     week4: WeeklyBreakdown;
   } | null>(null);
-  const [data, setData] = useState<{ rank?: number } | null>(null);
+  const [rank, setRank] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     const fetchBreakdown = async () => {
@@ -40,14 +41,18 @@ const UserBreakdown = () => {
         return;
       }
 
-      const findUserInData = (weekData: any) => 
-        weekData.data.find((entry: any) => entry.address === address);
+      const overallData = data.overall.data.find((entry: any) => entry.address === address);
+      const week1Data = data.week1.data.find((entry: any) => entry.address === address);
+      const week2Data = data.week2.data.find((entry: any) => entry.address === address);
+      const week3Data = data.week3.data.find((entry: any) => entry.address === address);
+      const week4Data = data.week4.data.find((entry: any) => entry.address === address);
 
-      const overallData = findUserInData(data.overall);
-      const week1Data = findUserInData(data.week1);
-      const week2Data = findUserInData(data.week2);
-      const week3Data = findUserInData(data.week3);
-      const week4Data = findUserInData(data.week4);
+      // Calculate rank from overall data
+      const userRank = data.overall.data
+        .sort((a: any, b: any) => b.sparks - a.sparks)
+        .findIndex((entry: any) => entry.address === address) + 1;
+
+      setRank(userRank > 0 ? userRank : undefined);
 
       const userBreakdown = {
         overall: overallData?.sparks || 0,
@@ -69,7 +74,6 @@ const UserBreakdown = () => {
       };
 
       setBreakdown(userBreakdown);
-      setData({ rank: overallData?.rank });
     };
 
     fetchBreakdown();
@@ -168,7 +172,7 @@ const UserBreakdown = () => {
         onOpenChange={setShowShareModal}
         sparks={breakdown.overall}
         address={address || ''}
-        rank={data?.rank}
+        rank={rank}
       />
     </div>
   );
