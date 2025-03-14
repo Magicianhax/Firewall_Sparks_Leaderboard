@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import * as htmlToImage from 'html-to-image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -77,18 +76,24 @@ export const ShareModal = ({ open, onOpenChange, sparks, address }: ShareModalPr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[650px]">
+      <DialogContent className="max-w-[650px] bg-gradient-to-br from-yellow-50 to-white dark:from-yellow-900/10 dark:to-background">
         <DialogHeader>
-          <DialogTitle>Share Your Sparks 🔥</DialogTitle>
+          <DialogTitle className="text-yellow-900 dark:text-yellow-100">Share Your Sparks 🔥</DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
           <ShareCard ref={cardRef} sparks={sparks} address={address} />
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button onClick={handleDownload} className="flex-1">
+            <Button 
+              onClick={handleDownload} 
+              className="flex-1 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white"
+            >
               <Download className="mr-2 h-4 w-4" />
               Download Card
             </Button>
-            <Button onClick={handleShare} className="flex-1">
+            <Button 
+              onClick={handleShare} 
+              className="flex-1 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white"
+            >
               <Share className="mr-2 h-4 w-4" />
               Share on Twitter
             </Button>
