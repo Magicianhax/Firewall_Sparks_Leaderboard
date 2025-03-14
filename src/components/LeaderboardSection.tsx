@@ -4,6 +4,7 @@ import { Search, Sparkle } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { cn } from '@/lib/utils';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { useNavigate } from 'react-router-dom';
 
 interface LeaderboardEntry {
   address: string;
@@ -32,6 +33,7 @@ const LeaderboardSection = ({
   currentPage,
   onPageChange 
 }: LeaderboardSectionProps) => {
+  const navigate = useNavigate();
   const filteredData = data.filter(entry =>
     entry.address.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -60,9 +62,10 @@ const LeaderboardSection = ({
             <div
               key={`${entry.address}-${index}`}
               className={cn(
-                "flex items-center justify-between p-4 rounded-lg leaderboard-transition hover:bg-yellow-50 dark:hover:bg-yellow-900/10",
+                "flex items-center justify-between p-4 rounded-lg leaderboard-transition hover:bg-yellow-50 dark:hover:bg-yellow-900/10 cursor-pointer",
                 index < 3 ? "bg-yellow-100/50 dark:bg-yellow-900/20" : "bg-secondary/50"
               )}
+              onClick={() => navigate(`/user/${entry.address}`)}
             >
               <div className="flex items-center gap-4">
                 <span className={cn(
@@ -74,7 +77,7 @@ const LeaderboardSection = ({
                   #{index + 1 + ((currentPage - 1) * 50)}
                 </span>
                 <div className="flex flex-col">
-                  <span className="font-mono">{entry.address}</span>
+                  <span className="font-mono hover:text-yellow-600 transition-colors">{entry.address}</span>
                   {entry.nftCollection && (
                     <span className="text-sm text-muted-foreground">
                       NFT Collection: {entry.nftCollection}
