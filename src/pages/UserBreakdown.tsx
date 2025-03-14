@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -76,25 +77,29 @@ const UserBreakdown = () => {
   }
 
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-b from-yellow-50 to-yellow-100 dark:from-yellow-900/10 dark:to-background">
-      <div className="container mx-auto space-y-8 max-w-4xl">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="hover:bg-yellow-100/50">
-            <ArrowLeft className="w-4 h-4" />
+    <div className="min-h-screen p-3 sm:p-6 bg-gradient-to-b from-yellow-50 to-yellow-100 dark:from-yellow-900/10 dark:to-background">
+      <div className="container mx-auto space-y-4 sm:space-y-8 max-w-4xl">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate(-1)} 
+            className="hover:bg-yellow-100/50 w-fit"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
-          <h1 className="text-3xl font-bold tracking-tighter text-yellow-900/90 dark:text-yellow-100/90 flex items-center gap-2">
-            <Sparkle className="w-6 h-6 text-yellow-500" />
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tighter text-yellow-900/90 dark:text-yellow-100/90 flex items-center gap-2">
+            <Sparkle className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />
             User Breakdown
           </h1>
         </div>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <div className="space-y-4">
-            <div className="flex justify-between items-center pb-4 border-b">
-              <span className="font-mono">{address}</span>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-4 border-b gap-2">
+              <span className="font-mono text-sm sm:text-base break-all">{address}</span>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-xl">{breakdown.overall}</span>
+                <span className="font-bold text-lg sm:text-xl">{breakdown.overall}</span>
                 <span className="text-yellow-500">🔥</span>
               </div>
             </div>
@@ -102,29 +107,29 @@ const UserBreakdown = () => {
             {[1, 2, 3, 4].map((week) => {
               const weekData = breakdown[`week${week}` as keyof typeof breakdown] as WeeklyBreakdown;
               return (
-                <div key={week} className="p-4 rounded-lg bg-secondary/50">
-                  <h3 className="font-semibold mb-2">Week {week}</h3>
-                  <div className="space-y-2">
+                <div key={week} className="p-3 sm:p-4 rounded-lg bg-secondary/50">
+                  <h3 className="font-semibold mb-3">Week {week}</h3>
+                  <div className="space-y-2.5">
                     <div className="flex justify-between items-center">
                       <span>Sparks</span>
                       <span className="font-semibold">{weekData.sparks} 🔥</span>
                     </div>
                     {weekData.hotSlothVerification && (
-                      <div className="flex justify-between items-center text-sm text-muted-foreground">
+                      <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
                         <span>Hot Sloth Verification</span>
-                        <span>{weekData.hotSlothVerification}</span>
+                        <span className="break-all">{weekData.hotSlothVerification}</span>
                       </div>
                     )}
                     {weekData.nftCollection && (
-                      <div className="flex justify-between items-center text-sm text-muted-foreground">
+                      <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
                         <span>NFT Collection</span>
-                        <span>{weekData.nftCollection}</span>
+                        <span className="break-all">{weekData.nftCollection}</span>
                       </div>
                     )}
                     {weekData.referralBonus && (
-                      <div className="flex justify-between items-center text-sm text-muted-foreground">
+                      <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
                         <span>Referral Bonus</span>
-                        <span>{weekData.referralBonus}</span>
+                        <span className="break-all">{weekData.referralBonus}</span>
                       </div>
                     )}
                   </div>
