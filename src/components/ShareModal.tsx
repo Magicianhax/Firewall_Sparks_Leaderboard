@@ -93,14 +93,14 @@ export const ShareModal = ({ open, onOpenChange, sparks, address, rank }: ShareM
           <div className="flex flex-col sm:flex-row gap-3">
             <Button 
               onClick={handleDownload} 
-              className="flex-1"
+              className="flex-1 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white font-semibold"
             >
               <Download className="mr-2 h-4 w-4" />
               Download Card
             </Button>
             <Button 
               onClick={handleShare} 
-              className="flex-1 bg-[#0066FF] hover:bg-[#0052CC] text-white"
+              className="flex-1 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white font-semibold"
             >
               <Share className="mr-2 h-4 w-4" />
               Share on Twitter

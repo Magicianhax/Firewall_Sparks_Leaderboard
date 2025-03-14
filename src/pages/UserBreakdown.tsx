@@ -156,7 +156,7 @@ const UserBreakdown = () => {
               <div className="text-sm text-muted-foreground flex items-center gap-1.5">
                 Created with <Heart className="w-4 h-4 text-red-500 fill-red-500" /> by @magicianafk
               </div>
-              <Button onClick={() => setShowShareModal(true)} className="w-full sm:w-auto bg-[#0066FF] hover:bg-[#0052CC] text-white">
+              <Button onClick={() => setShowShareModal(true)} className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white font-semibold">
                 <Share className="w-4 h-4 mr-2" />
                 Flex Your Sparks
               </Button>
