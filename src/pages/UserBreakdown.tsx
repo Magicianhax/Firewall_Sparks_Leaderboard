@@ -27,7 +27,7 @@ const UserBreakdown = () => {
 
   useEffect(() => {
     const fetchBreakdown = async () => {
-      const data = await readLeaderboardData(1);
+      const data = await readLeaderboardData(1, true);
       if (!data) {
         toast({
           title: "Error",

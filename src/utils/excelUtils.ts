@@ -13,18 +13,18 @@ export interface LeaderboardResponse {
   totalPages: number;
 }
 
-export async function readLeaderboardData(page: number = 1) {
+export async function readLeaderboardData(page: number = 1, fullData: boolean = false) {
   try {
     const response = await fetch('/Firewall_Sparks_Leaderboard.xlsx');
     const arrayBuffer = await response.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer);
     
     return {
-      overall: parseOverallSheet(workbook, 'Firewall_Sparks_Leaderboard', page),
-      week1: parseWeek1Sheet(workbook, 'week 1', page),
-      week2: parseWeek2Sheet(workbook, 'week 2', page),
-      week3: parseWeek3Sheet(workbook, 'week 3', page),
-      week4: parseWeek4Sheet(workbook, 'week 4', page),
+      overall: parseOverallSheet(workbook, 'Firewall_Sparks_Leaderboard', page, fullData),
+      week1: parseWeek1Sheet(workbook, 'week 1', page, fullData),
+      week2: parseWeek2Sheet(workbook, 'week 2', page, fullData),
+      week3: parseWeek3Sheet(workbook, 'week 3', page, fullData),
+      week4: parseWeek4Sheet(workbook, 'week 4', page, fullData),
     };
   } catch (error) {
     console.error('Error reading Excel file:', error);
@@ -32,11 +32,11 @@ export async function readLeaderboardData(page: number = 1) {
   }
 }
 
-// Overall tab: Address, 🔥Sparks
 function parseOverallSheet(
   workbook: XLSX.WorkBook, 
   sheetName: string, 
-  page: number
+  page: number,
+  fullData: boolean = false
 ): LeaderboardResponse {
   const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
@@ -46,21 +46,16 @@ function parseOverallSheet(
     return { data: [], totalPages: 0 };
   }
 
-  // Convert to raw data with headers
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // Skip title row and use the second row as headers for overall sheet
   const headers = rawData[1] || {};
   console.log(`Overall sheet headers:`, headers);
   
-  // Skip title and header rows for data processing
   const formattedData = rawData.slice(2).map((row: any) => {
-    // Find Address column
     const addressKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase() === 'address'
     ) || 'A';
     
-    // Find Sparks column
     const sparksKey = Object.keys(headers).find(
       key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
     ) || 'B';
@@ -71,7 +66,13 @@ function parseOverallSheet(
     };
   }).filter(item => item.address && !isNaN(item.sparks));
   
-  // Paginate the data
+  if (fullData) {
+    return {
+      data: formattedData,
+      totalPages: Math.ceil(formattedData.length / ITEMS_PER_PAGE),
+    };
+  }
+
   const start = (page - 1) * ITEMS_PER_PAGE;
   const end = start + ITEMS_PER_PAGE;
   
@@ -81,11 +82,11 @@ function parseOverallSheet(
   };
 }
 
-// Week 1 tab: Address, Hot Sloth Verification, 🔥Sparks
 function parseWeek1Sheet(
   workbook: XLSX.WorkBook, 
   sheetName: string, 
-  page: number
+  page: number,
+  fullData: boolean = false
 ): LeaderboardResponse {
   const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
@@ -95,26 +96,20 @@ function parseWeek1Sheet(
     return { data: [], totalPages: 0 };
   }
 
-  // Convert to raw data with headers
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // Extract the expected column headers
   const headers = rawData[0] || {};
   console.log(`Week 1 sheet headers:`, headers);
   
-  // Skip header row and process data
   const formattedData = rawData.slice(1).map((row: any) => {
-    // Find Address column
     const addressKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase() === 'address'
     ) || 'A';
     
-    // Find Hot Sloth Verification column
     const verificationKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase().includes('sloth')
     ) || 'B';
     
-    // Find Sparks column
     const sparksKey = Object.keys(headers).find(
       key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
     ) || 'C';
@@ -126,7 +121,13 @@ function parseWeek1Sheet(
     };
   }).filter(item => item.address && !isNaN(item.sparks));
   
-  // Paginate the data
+  if (fullData) {
+    return {
+      data: formattedData,
+      totalPages: Math.ceil(formattedData.length / ITEMS_PER_PAGE),
+    };
+  }
+
   const start = (page - 1) * ITEMS_PER_PAGE;
   const end = start + ITEMS_PER_PAGE;
   
@@ -136,11 +137,11 @@ function parseWeek1Sheet(
   };
 }
 
-// Week 2 tab: Address, NFT collection, ���Sparks
 function parseWeek2Sheet(
   workbook: XLSX.WorkBook, 
   sheetName: string, 
-  page: number
+  page: number,
+  fullData: boolean = false
 ): LeaderboardResponse {
   const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
@@ -150,27 +151,21 @@ function parseWeek2Sheet(
     return { data: [], totalPages: 0 };
   }
 
-  // Convert to raw data with headers
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // Skip title row and use the second row as headers for week 2
   const headers = rawData[1] || {};
   console.log(`Week 2 sheet headers:`, headers);
   
-  // Skip title and header rows for data processing
   const formattedData = rawData.slice(2).map((row: any) => {
-    // Find Address column
     const addressKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase() === 'address'
     ) || 'A';
     
-    // Find NFT collection column
     const nftKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase().includes('nft') || 
              String(headers[key]).toLowerCase().includes('collection')
     ) || 'B';
     
-    // Find Sparks column
     const sparksKey = Object.keys(headers).find(
       key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
     ) || 'C';
@@ -182,7 +177,13 @@ function parseWeek2Sheet(
     };
   }).filter(item => item.address && !isNaN(item.sparks));
   
-  // Paginate the data
+  if (fullData) {
+    return {
+      data: formattedData,
+      totalPages: Math.ceil(formattedData.length / ITEMS_PER_PAGE),
+    };
+  }
+
   const start = (page - 1) * ITEMS_PER_PAGE;
   const end = start + ITEMS_PER_PAGE;
   
@@ -192,11 +193,11 @@ function parseWeek2Sheet(
   };
 }
 
-// Week 3 tab: Address, 🔥Sparks, Referral Bonus
 function parseWeek3Sheet(
   workbook: XLSX.WorkBook, 
   sheetName: string, 
-  page: number
+  page: number,
+  fullData: boolean = false
 ): LeaderboardResponse {
   const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
@@ -206,26 +207,20 @@ function parseWeek3Sheet(
     return { data: [], totalPages: 0 };
   }
 
-  // Convert to raw data with headers
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // Extract the expected column headers
   const headers = rawData[0] || {};
   console.log(`Week 3 sheet headers:`, headers);
   
-  // Skip header row and process data
   const formattedData = rawData.slice(1).map((row: any) => {
-    // Find Address column
     const addressKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase() === 'address'
     ) || 'A';
     
-    // Find Sparks column
     const sparksKey = Object.keys(headers).find(
       key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
     ) || 'B';
     
-    // Find Referral Bonus column
     const referralKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase().includes('referral')
     ) || 'C';
@@ -237,7 +232,13 @@ function parseWeek3Sheet(
     };
   }).filter(item => item.address && !isNaN(item.sparks));
   
-  // Paginate the data
+  if (fullData) {
+    return {
+      data: formattedData,
+      totalPages: Math.ceil(formattedData.length / ITEMS_PER_PAGE),
+    };
+  }
+
   const start = (page - 1) * ITEMS_PER_PAGE;
   const end = start + ITEMS_PER_PAGE;
   
@@ -247,11 +248,11 @@ function parseWeek3Sheet(
   };
 }
 
-// Week 4 tab: Address, 🔥Sparks
 function parseWeek4Sheet(
   workbook: XLSX.WorkBook, 
   sheetName: string, 
-  page: number
+  page: number,
+  fullData: boolean = false
 ): LeaderboardResponse {
   const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
@@ -261,21 +262,16 @@ function parseWeek4Sheet(
     return { data: [], totalPages: 0 };
   }
 
-  // Convert to raw data with headers
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // Extract the expected column headers
   const headers = rawData[0] || {};
   console.log(`Week 4 sheet headers:`, headers);
   
-  // Skip header row and process data
   const formattedData = rawData.slice(1).map((row: any) => {
-    // Find Address column
     const addressKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase() === 'address'
     ) || 'A';
     
-    // Find Sparks column
     const sparksKey = Object.keys(headers).find(
       key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
     ) || 'B';
@@ -286,7 +282,13 @@ function parseWeek4Sheet(
     };
   }).filter(item => item.address && !isNaN(item.sparks));
   
-  // Paginate the data
+  if (fullData) {
+    return {
+      data: formattedData,
+      totalPages: Math.ceil(formattedData.length / ITEMS_PER_PAGE),
+    };
+  }
+
   const start = (page - 1) * ITEMS_PER_PAGE;
   const end = start + ITEMS_PER_PAGE;
   
