@@ -3,9 +3,7 @@ import * as XLSX from 'xlsx';
 export interface LeaderboardData {
   address: string;
   sparks: number;
-  nftCollection?: string;
-  hotSlothVerification?: string;
-  referralBonus?: string;
+  nftCollection?: string; // Only for week 2
 }
 
 export interface LeaderboardResponse {
@@ -32,7 +30,12 @@ export async function readLeaderboardData(page: number = 1) {
   }
 }
 
-function parseOverallSheet(workbook: XLSX.WorkBook, sheetName: string, page: number): LeaderboardResponse {
+// Overall tab: Address, 🔥Sparks
+function parseOverallSheet(
+  workbook: XLSX.WorkBook, 
+  sheetName: string, 
+  page: number
+): LeaderboardResponse {
   const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
   
@@ -41,17 +44,32 @@ function parseOverallSheet(workbook: XLSX.WorkBook, sheetName: string, page: num
     return { data: [], totalPages: 0 };
   }
 
-  const data = XLSX.utils.sheet_to_json(sheet, { header: ["address", "sparks"] });
+  // Convert to raw data with headers
+  const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // Remove header row if present
-  const formattedData = data
-    .slice(1) // Skip header row
-    .map((row: any) => ({
-      address: String(row.address || ''),
-      sparks: Number(row.sparks) || 0
-    }))
-    .filter(entry => entry.address && !isNaN(entry.sparks));
-
+  // Extract the expected column headers
+  const headers = rawData[0] || {};
+  console.log(`Overall sheet headers:`, headers);
+  
+  // Skip header row and process data
+  const formattedData = rawData.slice(1).map((row: any) => {
+    // Find Address column
+    const addressKey = Object.keys(headers).find(
+      key => String(headers[key]).toLowerCase() === 'address'
+    ) || 'A';
+    
+    // Find Sparks column
+    const sparksKey = Object.keys(headers).find(
+      key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
+    ) || 'B';
+    
+    return {
+      address: String(row[addressKey] || ''),
+      sparks: Number(row[sparksKey]) || 0
+    };
+  }).filter(item => item.address && !isNaN(item.sparks));
+  
+  // Paginate the data
   const start = (page - 1) * ITEMS_PER_PAGE;
   const end = start + ITEMS_PER_PAGE;
   
@@ -61,7 +79,12 @@ function parseOverallSheet(workbook: XLSX.WorkBook, sheetName: string, page: num
   };
 }
 
-function parseWeek1Sheet(workbook: XLSX.WorkBook, sheetName: string, page: number): LeaderboardResponse {
+// Week 1 tab: Address, Hot Sloth Verification, 🔥Sparks
+function parseWeek1Sheet(
+  workbook: XLSX.WorkBook, 
+  sheetName: string, 
+  page: number
+): LeaderboardResponse {
   const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
   
@@ -70,19 +93,32 @@ function parseWeek1Sheet(workbook: XLSX.WorkBook, sheetName: string, page: numbe
     return { data: [], totalPages: 0 };
   }
 
-  const data = XLSX.utils.sheet_to_json(sheet, { 
-    header: ["address", "hotSlothVerification", "sparks"]
-  });
+  // Convert to raw data with headers
+  const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  const formattedData = data
-    .slice(1) // Skip header row
-    .map((row: any) => ({
-      address: String(row.address || ''),
-      hotSlothVerification: String(row.hotSlothVerification || ''),
-      sparks: Number(row.sparks) || 0
-    }))
-    .filter(entry => entry.address && !isNaN(entry.sparks));
-
+  // Extract the expected column headers
+  const headers = rawData[0] || {};
+  console.log(`Week 1 sheet headers:`, headers);
+  
+  // Skip header row and process data
+  const formattedData = rawData.slice(1).map((row: any) => {
+    // Find Address column
+    const addressKey = Object.keys(headers).find(
+      key => String(headers[key]).toLowerCase() === 'address'
+    ) || 'A';
+    
+    // Find Sparks column - it should be after Hot Sloth Verification, typically column C
+    const sparksKey = Object.keys(headers).find(
+      key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
+    ) || 'C';
+    
+    return {
+      address: String(row[addressKey] || ''),
+      sparks: Number(row[sparksKey]) || 0
+    };
+  }).filter(item => item.address && !isNaN(item.sparks));
+  
+  // Paginate the data
   const start = (page - 1) * ITEMS_PER_PAGE;
   const end = start + ITEMS_PER_PAGE;
   
@@ -92,7 +128,12 @@ function parseWeek1Sheet(workbook: XLSX.WorkBook, sheetName: string, page: numbe
   };
 }
 
-function parseWeek2Sheet(workbook: XLSX.WorkBook, sheetName: string, page: number): LeaderboardResponse {
+// Week 2 tab: Address, NFT collection, 🔥Sparks
+function parseWeek2Sheet(
+  workbook: XLSX.WorkBook, 
+  sheetName: string, 
+  page: number
+): LeaderboardResponse {
   const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
   
@@ -101,19 +142,39 @@ function parseWeek2Sheet(workbook: XLSX.WorkBook, sheetName: string, page: numbe
     return { data: [], totalPages: 0 };
   }
 
-  const data = XLSX.utils.sheet_to_json(sheet, { 
-    header: ["address", "nftCollection", "sparks"]
-  });
+  // Convert to raw data with headers
+  const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  const formattedData = data
-    .slice(1) // Skip header row
-    .map((row: any) => ({
-      address: String(row.address || ''),
-      nftCollection: String(row.nftCollection || ''),
-      sparks: Number(row.sparks) || 0
-    }))
-    .filter(entry => entry.address && !isNaN(entry.sparks));
-
+  // Extract the expected column headers
+  const headers = rawData[0] || {};
+  console.log(`Week 2 sheet headers:`, headers);
+  
+  // Skip header row and process data
+  const formattedData = rawData.slice(1).map((row: any) => {
+    // Find Address column
+    const addressKey = Object.keys(headers).find(
+      key => String(headers[key]).toLowerCase() === 'address'
+    ) || 'A';
+    
+    // Find NFT collection column
+    const nftKey = Object.keys(headers).find(
+      key => String(headers[key]).toLowerCase().includes('nft') || 
+             String(headers[key]).toLowerCase().includes('collection')
+    ) || 'B';
+    
+    // Find Sparks column
+    const sparksKey = Object.keys(headers).find(
+      key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
+    ) || 'C';
+    
+    return {
+      address: String(row[addressKey] || ''),
+      sparks: Number(row[sparksKey]) || 0,
+      nftCollection: row[nftKey] ? String(row[nftKey]) : undefined
+    };
+  }).filter(item => item.address && !isNaN(item.sparks));
+  
+  // Paginate the data
   const start = (page - 1) * ITEMS_PER_PAGE;
   const end = start + ITEMS_PER_PAGE;
   
@@ -123,7 +184,12 @@ function parseWeek2Sheet(workbook: XLSX.WorkBook, sheetName: string, page: numbe
   };
 }
 
-function parseWeek3Sheet(workbook: XLSX.WorkBook, sheetName: string, page: number): LeaderboardResponse {
+// Week 3 tab: Address, 🔥Sparks, Referral Bonus
+function parseWeek3Sheet(
+  workbook: XLSX.WorkBook, 
+  sheetName: string, 
+  page: number
+): LeaderboardResponse {
   const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
   
@@ -132,19 +198,32 @@ function parseWeek3Sheet(workbook: XLSX.WorkBook, sheetName: string, page: numbe
     return { data: [], totalPages: 0 };
   }
 
-  const data = XLSX.utils.sheet_to_json(sheet, { 
-    header: ["address", "sparks", "referralBonus"]
-  });
+  // Convert to raw data with headers
+  const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  const formattedData = data
-    .slice(1) // Skip header row
-    .map((row: any) => ({
-      address: String(row.address || ''),
-      sparks: Number(row.sparks) || 0,
-      referralBonus: String(row.referralBonus || '')
-    }))
-    .filter(entry => entry.address && !isNaN(entry.sparks));
-
+  // Extract the expected column headers
+  const headers = rawData[0] || {};
+  console.log(`Week 3 sheet headers:`, headers);
+  
+  // Skip header row and process data
+  const formattedData = rawData.slice(1).map((row: any) => {
+    // Find Address column
+    const addressKey = Object.keys(headers).find(
+      key => String(headers[key]).toLowerCase() === 'address'
+    ) || 'A';
+    
+    // Find Sparks column
+    const sparksKey = Object.keys(headers).find(
+      key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
+    ) || 'B';
+    
+    return {
+      address: String(row[addressKey] || ''),
+      sparks: Number(row[sparksKey]) || 0
+    };
+  }).filter(item => item.address && !isNaN(item.sparks));
+  
+  // Paginate the data
   const start = (page - 1) * ITEMS_PER_PAGE;
   const end = start + ITEMS_PER_PAGE;
   
@@ -154,7 +233,12 @@ function parseWeek3Sheet(workbook: XLSX.WorkBook, sheetName: string, page: numbe
   };
 }
 
-function parseWeek4Sheet(workbook: XLSX.WorkBook, sheetName: string, page: number): LeaderboardResponse {
+// Week 4 tab: Address, 🔥Sparks
+function parseWeek4Sheet(
+  workbook: XLSX.WorkBook, 
+  sheetName: string, 
+  page: number
+): LeaderboardResponse {
   const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
   
@@ -163,18 +247,32 @@ function parseWeek4Sheet(workbook: XLSX.WorkBook, sheetName: string, page: numbe
     return { data: [], totalPages: 0 };
   }
 
-  const data = XLSX.utils.sheet_to_json(sheet, { 
-    header: ["address", "sparks"]
-  });
+  // Convert to raw data with headers
+  const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  const formattedData = data
-    .slice(1) // Skip header row
-    .map((row: any) => ({
-      address: String(row.address || ''),
-      sparks: Number(row.sparks) || 0
-    }))
-    .filter(entry => entry.address && !isNaN(entry.sparks));
-
+  // Extract the expected column headers
+  const headers = rawData[0] || {};
+  console.log(`Week 4 sheet headers:`, headers);
+  
+  // Skip header row and process data
+  const formattedData = rawData.slice(1).map((row: any) => {
+    // Find Address column
+    const addressKey = Object.keys(headers).find(
+      key => String(headers[key]).toLowerCase() === 'address'
+    ) || 'A';
+    
+    // Find Sparks column
+    const sparksKey = Object.keys(headers).find(
+      key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
+    ) || 'B';
+    
+    return {
+      address: String(row[addressKey] || ''),
+      sparks: Number(row[sparksKey]) || 0
+    };
+  }).filter(item => item.address && !isNaN(item.sparks));
+  
+  // Paginate the data
   const start = (page - 1) * ITEMS_PER_PAGE;
   const end = start + ITEMS_PER_PAGE;
   
