@@ -33,8 +33,10 @@ function parseSheet(workbook: XLSX.WorkBook, sheetName: string): LeaderboardData
   }
 
   const data = XLSX.utils.sheet_to_json(sheet);
-  return data.map((row: any) => ({
-    address: row['Address'] || '',
-    sparks: Number(row['🔥Sparks']) || 0,
-  }));
+  return data
+    .map((row: any) => ({
+      address: row['Address'] || '',
+      sparks: Number(row['🔥Sparks']) || 0,
+    }))
+    .slice(0, 50); // Limit to 50 addresses
 }

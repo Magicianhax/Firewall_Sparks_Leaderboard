@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from "@/components/ui/card";
-import { Search } from 'lucide-react';
+import { Search, Sparkle } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { cn } from '@/lib/utils';
 
@@ -26,7 +26,10 @@ const LeaderboardSection = ({ title, data, searchTerm, onSearchChange }: Leaderb
     <Card className="p-6 glass-card">
       <div className="space-y-6">
         <div className="flex flex-col gap-4">
-          <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
+          <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            {title}
+            <Sparkle className="w-5 h-5 text-yellow-500 animate-pulse" />
+          </h2>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
             <Input
@@ -43,9 +46,8 @@ const LeaderboardSection = ({ title, data, searchTerm, onSearchChange }: Leaderb
             <div
               key={entry.address}
               className={cn(
-                "flex items-center justify-between p-4 rounded-lg leaderboard-transition",
-                index < 3 ? "bg-primary/5" : "bg-secondary/50",
-                "hover:scale-[1.02]"
+                "flex items-center justify-between p-4 rounded-lg leaderboard-transition hover:bg-yellow-50 dark:hover:bg-yellow-900/10",
+                index < 3 ? "bg-yellow-100/50 dark:bg-yellow-900/20" : "bg-secondary/50"
               )}
             >
               <div className="flex items-center gap-4">
@@ -61,7 +63,7 @@ const LeaderboardSection = ({ title, data, searchTerm, onSearchChange }: Leaderb
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-semibold">{entry.sparks}</span>
-                <span className="text-primary">🔥</span>
+                <span className="text-yellow-500">🔥</span>
               </div>
             </div>
           ))}
