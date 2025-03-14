@@ -9,6 +9,8 @@ interface LeaderboardEntry {
   address: string;
   sparks: number;
   nftCollection?: string;
+  hotSlothVerification?: string;
+  referralBonus?: string;
 }
 
 interface LeaderboardSectionProps {
@@ -76,6 +78,16 @@ const LeaderboardSection = ({
                   {entry.nftCollection && (
                     <span className="text-sm text-muted-foreground">
                       NFT: {entry.nftCollection}
+                    </span>
+                  )}
+                  {entry.hotSlothVerification && (
+                    <span className="text-sm text-muted-foreground">
+                      Hot Sloth: {entry.hotSlothVerification}
+                    </span>
+                  )}
+                  {entry.referralBonus && (
+                    <span className="text-sm text-muted-foreground">
+                      Referral: {entry.referralBonus}
                     </span>
                   )}
                 </div>
