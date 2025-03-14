@@ -77,7 +77,7 @@ const LeaderboardSection = ({
                   <span className="font-mono">{entry.address}</span>
                   {entry.nftCollection && (
                     <span className="text-sm text-muted-foreground">
-                      NFT: {entry.nftCollection}
+                      NFT Collection: {entry.nftCollection}
                     </span>
                   )}
                   {entry.hotSlothVerification && (
