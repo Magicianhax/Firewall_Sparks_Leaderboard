@@ -38,15 +38,15 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-b from-yellow-50 to-yellow-100 dark:from-yellow-900/10 dark:to-background">
-      <div className="container mx-auto space-y-8">
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl text-yellow-900/90 dark:text-yellow-100/90 flex items-center justify-center gap-2">
-            <Sparkle className="w-8 h-8 text-yellow-500 animate-bounce" />
+    <div className="min-h-screen p-2 sm:p-6 bg-gradient-to-b from-yellow-50 to-yellow-100 dark:from-yellow-900/10 dark:to-background">
+      <div className="container mx-auto space-y-4 sm:space-y-8">
+        <div className="text-center space-y-2 sm:space-y-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tighter text-yellow-900/90 dark:text-yellow-100/90 flex items-center justify-center gap-2">
+            <Sparkle className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-500 animate-bounce" />
             Firewall Sparks Leaderboard
-            <Sparkle className="w-8 h-8 text-yellow-500 animate-bounce" />
+            <Sparkle className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-500 animate-bounce" />
           </h1>
-          <p className="text-muted-foreground max-w-[600px] mx-auto">
+          <p className="text-sm sm:text-base text-muted-foreground max-w-[600px] mx-auto">
             Compete with others in the Firewall community
           </p>
         </div>
@@ -61,7 +61,7 @@ const Index = () => {
           onPageChange={handlePageChange}
         />
 
-        <footer className="text-center text-sm text-muted-foreground mt-8">
+        <footer className="text-center text-xs sm:text-sm text-muted-foreground mt-4 sm:mt-8">
           <p className="flex items-center justify-center gap-1">
             Created with ❤️ by{" "}
             <a 

@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LeaderboardSection from './LeaderboardSection';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LeaderboardData {
   address: string;
@@ -33,16 +33,30 @@ const LeaderboardTabs = ({
   onPageChange
 }: LeaderboardTabsProps) => {
   const [searchTerm, setSearchTerm] = React.useState("");
+  const isMobile = useIsMobile();
 
   return (
-    <Tabs defaultValue="overall" className="w-full max-w-4xl mx-auto space-y-6">
-      <TabsList className="grid w-full grid-cols-5">
-        <TabsTrigger value="overall">Overall</TabsTrigger>
-        <TabsTrigger value="week1">Week 1</TabsTrigger>
-        <TabsTrigger value="week2">Week 2</TabsTrigger>
-        <TabsTrigger value="week3">Week 3</TabsTrigger>
-        <TabsTrigger value="week4">Week 4</TabsTrigger>
+    <Tabs defaultValue="overall" className="w-full max-w-4xl mx-auto space-y-4 sm:space-y-6">
+      <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 gap-1">
+        <TabsTrigger value="overall" className="text-sm sm:text-base">
+          {isMobile ? "All" : "Overall"}
+        </TabsTrigger>
+        <TabsTrigger value="week1" className="text-sm sm:text-base">W1</TabsTrigger>
+        <TabsTrigger value="week2" className="text-sm sm:text-base">W2</TabsTrigger>
+        {!isMobile && (
+          <>
+            <TabsTrigger value="week3" className="text-sm sm:text-base">Week 3</TabsTrigger>
+            <TabsTrigger value="week4" className="text-sm sm:text-base">Week 4</TabsTrigger>
+          </>
+        )}
       </TabsList>
+      
+      {isMobile && (
+        <TabsList className="grid w-full grid-cols-2 gap-1">
+          <TabsTrigger value="week3" className="text-sm sm:text-base">W3</TabsTrigger>
+          <TabsTrigger value="week4" className="text-sm sm:text-base">W4</TabsTrigger>
+        </TabsList>
+      )}
       
       <TabsContent value="overall">
         <LeaderboardSection

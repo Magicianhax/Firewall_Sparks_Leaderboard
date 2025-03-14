@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Search, Sparkle } from 'lucide-react';
@@ -8,6 +7,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from "@/components/ui/skeleton";
 import { readLeaderboardData } from '@/utils/excelUtils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LeaderboardEntry {
   address: string;
@@ -21,11 +21,11 @@ interface LeaderboardEntry {
 interface LeaderboardSectionProps {
   title: string;
   data: LeaderboardEntry[];
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
   totalPages: number;
   currentPage: number;
   onPageChange: (page: number) => void;
-  searchTerm: string;
-  onSearchChange: (value: string) => void;
 }
 
 const LeaderboardSection = ({ 
@@ -38,6 +38,7 @@ const LeaderboardSection = ({
   onPageChange 
 }: LeaderboardSectionProps) => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<LeaderboardEntry[]>([]);
   const [noResults, setNoResults] = useState(false);
@@ -54,7 +55,6 @@ const LeaderboardSection = ({
       setNoResults(false);
 
       try {
-        // Get full data for searching
         const fullData = await readLeaderboardData(1, true);
         if (!fullData) {
           setNoResults(true);
@@ -64,7 +64,6 @@ const LeaderboardSection = ({
         const searchTermLower = searchTerm.toLowerCase();
         let results: LeaderboardEntry[] = [];
 
-        // Search in the complete dataset
         const allEntries = fullData.overall.data;
         results = allEntries
           .filter(entry => entry.address.toLowerCase().includes(searchTermLower))
@@ -89,6 +88,89 @@ const LeaderboardSection = ({
 
   const displayData = searchTerm ? searchResults : data;
 
+  const renderPagination = () => {
+    if (searchTerm || totalPages <= 1) return null;
+
+    const maxVisiblePages = isMobile ? 3 : 7;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    const pages = [];
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return (
+      <Pagination>
+        <PaginationContent className="flex-wrap gap-2">
+          <PaginationItem>
+            <PaginationPrevious 
+              onClick={() => onPageChange(currentPage - 1)}
+              className={cn(
+                "cursor-pointer",
+                currentPage === 1 && "pointer-events-none opacity-50"
+              )}
+            />
+          </PaginationItem>
+          
+          {startPage > 1 && (
+            <>
+              <PaginationItem>
+                <PaginationLink onClick={() => onPageChange(1)}>1</PaginationLink>
+              </PaginationItem>
+              {startPage > 2 && (
+                <PaginationItem>
+                  <span className="px-2">...</span>
+                </PaginationItem>
+              )}
+            </>
+          )}
+
+          {pages.map((page) => (
+            <PaginationItem key={page}>
+              <PaginationLink
+                onClick={() => onPageChange(page)}
+                isActive={currentPage === page}
+                className="cursor-pointer"
+              >
+                {page}
+              </PaginationLink>
+            </PaginationItem>
+          ))}
+
+          {endPage < totalPages && (
+            <>
+              {endPage < totalPages - 1 && (
+                <PaginationItem>
+                  <span className="px-2">...</span>
+                </PaginationItem>
+              )}
+              <PaginationItem>
+                <PaginationLink onClick={() => onPageChange(totalPages)}>
+                  {totalPages}
+                </PaginationLink>
+              </PaginationItem>
+            </>
+          )}
+
+          <PaginationItem>
+            <PaginationNext 
+              onClick={() => onPageChange(currentPage + 1)}
+              className={cn(
+                "cursor-pointer",
+                currentPage === totalPages && "pointer-events-none opacity-50"
+              )}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    );
+  };
+
   const renderContent = () => {
     if (isSearching) {
       return Array(5).fill(0).map((_, index) => (
@@ -106,59 +188,58 @@ const LeaderboardSection = ({
       );
     }
 
-    return displayData.map((entry, index) => {
-      const rank = searchTerm ? entry.rank : index + 1 + ((currentPage - 1) * 50);
-      return (
-        <div
-          key={`${entry.address}-${index}`}
-          className={cn(
-            "flex items-center justify-between p-4 rounded-lg leaderboard-transition hover:bg-yellow-50 dark:hover:bg-yellow-900/10 cursor-pointer",
-            rank <= 3 ? "bg-yellow-100/50 dark:bg-yellow-900/20" : "bg-secondary/50"
-          )}
-          onClick={() => navigate(`/user/${entry.address}`)}
-        >
-          <div className="flex items-center gap-4">
-            <span className={cn(
-              "font-semibold",
-              rank === 1 && "text-yellow-500",
-              rank === 2 && "text-gray-400",
-              rank === 3 && "text-amber-600"
-            )}>
-              #{rank}
+    return displayData.map((entry, index) => (
+      <div
+        key={`${entry.address}-${index}`}
+        className={cn(
+          "flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-lg leaderboard-transition hover:bg-yellow-50 dark:hover:bg-yellow-900/10 cursor-pointer gap-4",
+          entry.rank && entry.rank <= 3 ? "bg-yellow-100/50 dark:bg-yellow-900/20" : "bg-secondary/50"
+        )}
+        onClick={() => navigate(`/user/${entry.address}`)}
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 w-full">
+          <span className={cn(
+            "font-semibold",
+            entry.rank === 1 && "text-yellow-500",
+            entry.rank === 2 && "text-gray-400",
+            entry.rank === 3 && "text-amber-600"
+          )}>
+            #{entry.rank || index + 1 + ((currentPage - 1) * 50)}
+          </span>
+          <div className="flex flex-col">
+            <span className="font-mono hover:text-yellow-600 transition-colors break-all">
+              {entry.address}
             </span>
-            <div className="flex flex-col">
-              <span className="font-mono hover:text-yellow-600 transition-colors">{entry.address}</span>
-              {entry.nftCollection && (
-                <span className="text-sm text-muted-foreground">
-                  NFT Collection: {entry.nftCollection}
-                </span>
-              )}
-              {entry.hotSlothVerification && (
-                <span className="text-sm text-muted-foreground">
-                  Hot Sloth: {entry.hotSlothVerification}
-                </span>
-              )}
-              {entry.referralBonus && (
-                <span className="text-sm text-muted-foreground">
-                  Referral: {entry.referralBonus}
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="font-semibold">{entry.sparks}</span>
-            <span className="text-yellow-500">🔥</span>
+            {entry.nftCollection && (
+              <span className="text-sm text-muted-foreground">
+                NFT Collection: {entry.nftCollection}
+              </span>
+            )}
+            {entry.hotSlothVerification && (
+              <span className="text-sm text-muted-foreground">
+                Hot Sloth: {entry.hotSlothVerification}
+              </span>
+            )}
+            {entry.referralBonus && (
+              <span className="text-sm text-muted-foreground">
+                Referral: {entry.referralBonus}
+              </span>
+            )}
           </div>
         </div>
-      );
-    });
+        <div className="flex items-center gap-2 self-end sm:self-center">
+          <span className="font-semibold">{entry.sparks}</span>
+          <span className="text-yellow-500">🔥</span>
+        </div>
+      </div>
+    ));
   };
 
   return (
-    <Card className="p-6 glass-card">
+    <Card className="p-4 sm:p-6 glass-card">
       <div className="space-y-6">
         <div className="flex flex-col gap-4">
-          <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2 justify-center sm:justify-start">
             {title}
             <Sparkle className="w-5 h-5 text-yellow-500 animate-pulse" />
           </h2>
@@ -177,39 +258,10 @@ const LeaderboardSection = ({
           {renderContent()}
         </div>
 
-        {!searchTerm && totalPages > 1 && (
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious 
-                  onClick={() => onPageChange(currentPage - 1)}
-                  className={cn("cursor-pointer", currentPage === 1 && "pointer-events-none opacity-50")}
-                />
-              </PaginationItem>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    onClick={() => onPageChange(page)}
-                    isActive={currentPage === page}
-                    className="cursor-pointer"
-                  >
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext 
-                  onClick={() => onPageChange(currentPage + 1)}
-                  className={cn("cursor-pointer", currentPage === totalPages && "pointer-events-none opacity-50")}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        )}
+        {renderPagination()}
       </div>
     </Card>
   );
 };
 
 export default LeaderboardSection;
-
