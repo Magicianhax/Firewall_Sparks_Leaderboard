@@ -1,11 +1,11 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, Sparkle } from 'lucide-react';
+import { ArrowLeft, Heart, Share } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { readLeaderboardData } from '@/utils/excelUtils';
 import { useToast } from "@/components/ui/use-toast";
+import { ShareModal } from '@/components/ShareModal';
 
 interface WeeklyBreakdown {
   sparks: number;
@@ -18,6 +18,7 @@ const UserBreakdown = () => {
   const { address } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [showShareModal, setShowShareModal] = useState(false);
   const [breakdown, setBreakdown] = useState<{
     overall: number;
     week1: WeeklyBreakdown;
@@ -89,7 +90,6 @@ const UserBreakdown = () => {
             Back
           </Button>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tighter text-yellow-900/90 dark:text-yellow-100/90 flex items-center gap-2">
-            <Sparkle className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />
             User Breakdown
           </h1>
         </div>
@@ -136,9 +136,26 @@ const UserBreakdown = () => {
                 </div>
               );
             })}
+
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t">
+              <div className="text-sm text-muted-foreground flex items-center gap-1.5">
+                Created with <Heart className="w-4 h-4 text-red-500 fill-red-500" /> by @magicianafk
+              </div>
+              <Button onClick={() => setShowShareModal(true)} className="w-full sm:w-auto">
+                <Share className="w-4 h-4 mr-2" />
+                Flex Your Sparks
+              </Button>
+            </div>
           </div>
         </Card>
       </div>
+
+      <ShareModal 
+        open={showShareModal}
+        onOpenChange={setShowShareModal}
+        sparks={breakdown.overall}
+        address={address || ''}
+      />
     </div>
   );
 };
