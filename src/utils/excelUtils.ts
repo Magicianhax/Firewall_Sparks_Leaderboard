@@ -4,6 +4,8 @@ export interface LeaderboardData {
   address: string;
   sparks: number;
   nftCollection?: string; // Only for week 2
+  hotSlothVerification?: string; // Only for week 1
+  referralBonus?: string; // Only for week 3
 }
 
 export interface LeaderboardResponse {
@@ -107,14 +109,20 @@ function parseWeek1Sheet(
       key => String(headers[key]).toLowerCase() === 'address'
     ) || 'A';
     
-    // Find Sparks column - it should be after Hot Sloth Verification, typically column C
+    // Find Hot Sloth Verification column
+    const verificationKey = Object.keys(headers).find(
+      key => String(headers[key]).toLowerCase().includes('sloth')
+    ) || 'B';
+    
+    // Find Sparks column
     const sparksKey = Object.keys(headers).find(
       key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
     ) || 'C';
     
     return {
       address: String(row[addressKey] || ''),
-      sparks: Number(row[sparksKey]) || 0
+      sparks: Number(row[sparksKey]) || 0,
+      hotSlothVerification: row[verificationKey] ? String(row[verificationKey]) : undefined
     };
   }).filter(item => item.address && !isNaN(item.sparks));
   
@@ -217,9 +225,15 @@ function parseWeek3Sheet(
       key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
     ) || 'B';
     
+    // Find Referral Bonus column
+    const referralKey = Object.keys(headers).find(
+      key => String(headers[key]).toLowerCase().includes('referral')
+    ) || 'C';
+    
     return {
       address: String(row[addressKey] || ''),
-      sparks: Number(row[sparksKey]) || 0
+      sparks: Number(row[sparksKey]) || 0,
+      referralBonus: row[referralKey] ? String(row[referralKey]) : undefined
     };
   }).filter(item => item.address && !isNaN(item.sparks));
   
