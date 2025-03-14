@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import * as htmlToImage from 'html-to-image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -45,7 +44,7 @@ export const ShareModal = ({ open, onOpenChange, sparks, address, rank }: ShareM
   const handleShare = () => {
     const rankText = rank ? `#${rank}` : '';
     const leaderboardUrl = 'https://firewall-sparks-leaderboard.lovable.app/';
-    const tweetText = `🔥 JUST BROKE ${rankText} IN @UseFirewall GENESIS! 🔥\n\nSitting on a massive ${sparks} Sparks and climbing! 📈\nThe grind is paying off BIG TIME. 🚀\n\nCheck your own Sparks balance on the dashboard built by @magicianafk\n${leaderboardUrl}\n\nWHO'S WITH ME FOR THE NEXT MILESTONE? 👀\n\n#FirewallGenesis`;
+    const tweetText = `🔥 JUST BROKE ${rankText} IN @UseFirewall GENESIS! 🔥\n\nSitting on a massive ${sparks} Sparks and climbing! 📈\nThe grind is paying off BIG TIME. 🚀\n\nCheck your own Sparks balance on the dashboard built by @magicianafk\n${leaderboardUrl}\n\n#FirewallGenesis`;
     
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
     window.open(twitterUrl, '_blank');
