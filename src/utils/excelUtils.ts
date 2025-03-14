@@ -67,59 +67,32 @@ function parseSheet(
   }
 
   // Convert sheet data to JSON with header row option
-  // This helps to maintain consistent column names
-  const rawData = XLSX.utils.sheet_to_json(sheet, { header: "A" });
+  const rawData = XLSX.utils.sheet_to_json(sheet);
   
-  // Skip header row and process data
-  const dataStartIndex = 1; // Skip header row
-  const processedData = rawData.slice(dataStartIndex).map((row: any, index) => {
-    // We need to determine column mapping from the header row
-    if (index === 0) {
-      console.log(`Columns in "${sheetName}" sheet:`, row);
-    }
-    
-    // Extract data from row - handle different possible column formats
+  // Process data, skipping the header row
+  const processedData = rawData.map((row: any) => {
     let address = '';
     let sparks = 0;
     let nftCollection = '';
     
-    // Process based on column position rather than exact name
-    // This is more resilient to different column names
-    Object.entries(row).forEach(([col, value]) => {
-      // Convert to string for comparison
-      const strValue = String(value).toLowerCase();
-      
-      // Address is typically in column A or column with "address" or "wallet" in header
-      if (col === 'A' || (typeof value === 'string' && 
-          (strValue.includes('0x') || strValue.length === 42))) {
-        address = String(value);
-      }
-      
-      // Sparks is typically a number, often in column B or C
-      if (col === 'B' || col === 'C') {
-        // Make sure it's a number
-        const numValue = Number(value);
-        if (!isNaN(numValue)) {
-          sparks = numValue;
-        }
-      }
-      
-      // NFT Collection might be in columns C, D, or E
-      if (includeNFT && (col === 'C' || col === 'D' || col === 'E')) {
-        // Only set if it's a string and doesn't look like an address or number
-        if (typeof value === 'string' && 
-            !strValue.includes('0x') && 
-            isNaN(Number(value))) {
-          nftCollection = String(value);
-        }
-      }
-    });
+    // For overall sheet (Firewall_Sparks_Leaderboard)
+    if ('Address' in row && '🔥Sparks' in row) {
+      address = row['Address'];
+      sparks = Number(row['🔥Sparks']);
+    }
     
-    // Skip rows with empty address or invalid sparks
+    // For week 2 sheet
+    if ('Address' in row && 'NFT collection' in row && '🔥Sparks' in row) {
+      address = row['Address'];
+      sparks = Number(row['🔥Sparks']);
+      nftCollection = row['NFT collection'];
+    }
+
+    // Skip invalid entries
     if (!address || isNaN(sparks)) {
       return null;
     }
-    
+
     const baseData = {
       address,
       sparks,
@@ -133,7 +106,7 @@ function parseSheet(
     }
 
     return baseData;
-  }).filter((item): item is LeaderboardData => item !== null); // Remove null items
+  }).filter((item): item is LeaderboardData => item !== null);
 
   const start = (page - 1) * ITEMS_PER_PAGE;
   const end = start + ITEMS_PER_PAGE;
