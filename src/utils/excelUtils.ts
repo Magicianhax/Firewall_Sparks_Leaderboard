@@ -15,7 +15,14 @@ export async function readLeaderboardData(page: number = 1) {
   try {
     const response = await fetch('/Firewall_Sparks_Leaderboard.xlsx');
     const arrayBuffer = await response.arrayBuffer();
-    const workbook = XLSX.read(arrayBuffer);
+    
+    // Read the Excel file with more detailed options
+    const workbook = XLSX.read(arrayBuffer, {
+      cellDates: true,  // Correctly parse dates
+      cellStyles: true, // Preserve styling information
+      cellNF: true,     // Preserve number formats
+      sheetStubs: true  // Create stub cells for empty cells
+    });
     
     // Debug: Log actual sheet names
     console.log("Available sheets:", workbook.SheetNames);
@@ -66,16 +73,16 @@ function parseSheet(
     return { data: [], totalPages: 0 };
   }
 
-  // Convert sheet data to JSON with header row option
-  // This helps to maintain consistent column names
-  const rawData = XLSX.utils.sheet_to_json(sheet, { header: "A" });
+  // Convert sheet data to JSON without headers
+  // We'll parse based on column position instead
+  const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
   
   // Skip header row and process data
   const dataStartIndex = 1; // Skip header row
   const processedData = rawData.slice(dataStartIndex).map((row: any, index) => {
-    // We need to determine column mapping from the header row
+    // Log the structure of first row for debugging
     if (index === 0) {
-      console.log(`Columns in "${sheetName}" sheet:`, row);
+      console.log(`First data row in "${sheetName}" sheet:`, row);
     }
     
     // Extract data from row - handle different possible column formats
@@ -83,37 +90,32 @@ function parseSheet(
     let sparks = 0;
     let nftCollection = '';
     
-    // Process based on column position rather than exact name
-    // This is more resilient to different column names
-    Object.entries(row).forEach(([col, value]) => {
-      // Convert to string for comparison
-      const strValue = String(value).toLowerCase();
-      
-      // Address is typically in column A or column with "address" or "wallet" in header
-      if (col === 'A' || (typeof value === 'string' && 
-          (strValue.includes('0x') || strValue.length === 42))) {
-        address = String(value);
+    // Process based on array positions directly
+    // This is more resilient to column header variations
+    
+    // Check if row is an array
+    if (Array.isArray(row)) {
+      // Assume first column (index 0) is the address
+      if (row[0] && typeof row[0] === 'string') {
+        address = row[0].toString().trim();
       }
       
-      // Sparks is typically a number, often in column B or C
-      if (col === 'B' || col === 'C') {
-        // Make sure it's a number
-        const numValue = Number(value);
+      // Assume second column (index 1) is the sparks count
+      if (row[1] !== undefined && row[1] !== '') {
+        const numValue = Number(row[1]);
         if (!isNaN(numValue)) {
           sparks = numValue;
         }
       }
       
-      // NFT Collection might be in columns C, D, or E
-      if (includeNFT && (col === 'C' || col === 'D' || col === 'E')) {
-        // Only set if it's a string and doesn't look like an address or number
-        if (typeof value === 'string' && 
-            !strValue.includes('0x') && 
-            isNaN(Number(value))) {
-          nftCollection = String(value);
-        }
+      // If NFT collection is included, check third column (index 2)
+      if (includeNFT && row[2] !== undefined && row[2] !== '') {
+        nftCollection = row[2].toString().trim();
       }
-    });
+    } else {
+      // Fallback for non-array format (should not happen with header:1 option)
+      console.warn('Unexpected row format:', row);
+    }
     
     // Skip rows with empty address or invalid sparks
     if (!address || isNaN(sparks)) {
