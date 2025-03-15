@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Trophy, Heart } from 'lucide-react';
@@ -54,8 +53,8 @@ export const ShareCard = React.forwardRef<HTMLDivElement, ShareCardProps>(({ spa
           </div>
         </div>
 
-        <div className="flex-grow flex flex-col justify-center space-y-2">
-          <p className="text-xl sm:text-4xl font-bold">{sparks.toLocaleString()} Sparks 🔥</p>
+        <div className="mt-auto">
+          <p className="text-xl sm:text-4xl font-bold mb-1">{sparks.toLocaleString()} Sparks 🔥</p>
           <div className="flex items-center justify-center gap-1.5 text-[10px] sm:text-sm text-yellow-800/70 dark:text-yellow-200/70 font-medium">
             Created with <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-red-500 fill-red-500" /> by{" "}
             <a 
@@ -74,4 +73,3 @@ export const ShareCard = React.forwardRef<HTMLDivElement, ShareCardProps>(({ spa
 });
 
 ShareCard.displayName = 'ShareCard';
-
