@@ -79,7 +79,23 @@ const UserBreakdown = () => {
   }, [address, toast]);
 
   if (!breakdown) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    return (
+      <div className="min-h-screen p-3 sm:p-6 bg-gradient-to-br from-yellow-50 to-white dark:from-yellow-900/10 dark:to-background">
+        <div className="container mx-auto space-y-4 sm:space-y-6 max-w-4xl">
+          <div className="h-10 w-32">
+            <Skeleton className="h-full w-full" />
+          </div>
+          <div className="space-y-4">
+            <Skeleton className="h-16 w-full" />
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-40 w-full" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
