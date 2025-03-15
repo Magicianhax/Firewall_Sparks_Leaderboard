@@ -56,7 +56,7 @@ export const ShareCard = React.forwardRef<HTMLDivElement, ShareCardProps>(({ spa
 
         <div className="flex flex-col space-y-2">
           <p className="text-xl sm:text-4xl font-bold">{sparks.toLocaleString()} Sparks 🔥</p>
-          <div className="flex items-center justify-center gap-1.5 text-[10px] sm:text-sm text-yellow-800/70 dark:text-yellow-200/70 font-medium">
+          <div className="flex items-center gap-1.5 text-[10px] sm:text-sm text-yellow-800/70 dark:text-yellow-200/70 font-medium">
             Created with <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-red-500 fill-red-500" /> by{" "}
             <a 
               href="https://twitter.com/magicianafk" 
