@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Trophy, Heart } from 'lucide-react';
@@ -38,7 +39,7 @@ export const ShareCard = React.forwardRef<HTMLDivElement, ShareCardProps>(({ spa
       <div className="absolute bottom-0 left-0 w-16 sm:w-32 h-16 sm:h-32 bg-yellow-500/10 rounded-full translate-y-1/2 -translate-x-1/2" />
       
       <div className="flex flex-col h-full relative">
-        <div className="space-y-1 sm:space-y-4">
+        <div className="space-y-1 sm:space-y-4 mb-auto">
           <h2 className="text-2xl sm:text-6xl font-serif tracking-tight text-yellow-950 dark:text-yellow-50">Firewall Genesis</h2>
           
           {rank && (
@@ -53,8 +54,8 @@ export const ShareCard = React.forwardRef<HTMLDivElement, ShareCardProps>(({ spa
           </div>
         </div>
 
-        <div className="mt-auto">
-          <p className="text-xl sm:text-4xl font-bold mb-1">{sparks.toLocaleString()} Sparks 🔥</p>
+        <div className="flex flex-col space-y-2">
+          <p className="text-xl sm:text-4xl font-bold">{sparks.toLocaleString()} Sparks 🔥</p>
           <div className="flex items-center justify-center gap-1.5 text-[10px] sm:text-sm text-yellow-800/70 dark:text-yellow-200/70 font-medium">
             Created with <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-red-500 fill-red-500" /> by{" "}
             <a 
