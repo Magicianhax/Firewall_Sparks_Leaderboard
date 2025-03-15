@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ShareCard } from '@/components/ShareCard';
 import { Download, Share } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 
 interface ShareModalProps {
   open: boolean;
@@ -17,21 +18,36 @@ interface ShareModalProps {
 export const ShareModal = ({ open, onOpenChange, sparks, address, rank }: ShareModalProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
     
     try {
       const dataUrl = await htmlToImage.toPng(cardRef.current);
-      const link = document.createElement('a');
-      link.download = 'firewall-sparks.png';
-      link.href = dataUrl;
-      link.click();
       
-      toast({
-        title: "Success!",
-        description: "Card downloaded successfully",
-      });
+      if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+        const newTab = window.open();
+        if (newTab) {
+          newTab.document.write(`<img src="${dataUrl}" alt="Firewall Sparks"/>`);
+          toast({
+            title: "Image ready!",
+            description: "Long press the image to save",
+          });
+        } else {
+          throw new Error("Popup blocked");
+        }
+      } else {
+        const link = document.createElement('a');
+        link.download = 'firewall-sparks.png';
+        link.href = dataUrl;
+        link.click();
+        
+        toast({
+          title: "Success!",
+          description: "Card downloaded successfully",
+        });
+      }
     } catch (err) {
       toast({
         title: "Error",
@@ -52,19 +68,21 @@ export const ShareModal = ({ open, onOpenChange, sparks, address, rank }: ShareM
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[650px] bg-gradient-to-br from-yellow-50 to-white dark:from-yellow-900/10 dark:to-background">
+      <DialogContent className={`${isMobile ? 'max-w-[350px]' : 'max-w-[650px]'} bg-gradient-to-br from-yellow-50 to-white dark:from-yellow-900/10 dark:to-background`}>
         <DialogHeader>
           <DialogTitle className="text-yellow-900 dark:text-yellow-100">Share Your Sparks 🔥</DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
-          <ShareCard ref={cardRef} sparks={sparks} address={address} rank={rank} />
+          <div className="flex justify-center">
+            <ShareCard ref={cardRef} sparks={sparks} address={address} rank={rank} />
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Button 
               onClick={handleDownload} 
               className="bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white font-semibold"
             >
               <Download className="mr-2 h-4 w-4" />
-              Download Card
+              {/iPad|iPhone|iPod/.test(navigator.userAgent) ? 'View Image' : 'Download Card'}
             </Button>
             <Button 
               onClick={handleShare} 
