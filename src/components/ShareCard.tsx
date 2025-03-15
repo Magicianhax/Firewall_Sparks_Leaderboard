@@ -52,19 +52,18 @@ export const ShareCard = React.forwardRef<HTMLDivElement, ShareCardProps>(({ spa
           
           <div className="space-y-2 sm:space-y-4">
             <div className="flex items-center gap-2 sm:gap-4">
-              <span className="text-2xl sm:text-5xl">🔥</span>
-              <p className="text-xl sm:text-4xl font-bold">{sparks.toLocaleString()} Sparks</p>
+              <p className="text-xl sm:text-4xl font-bold">{sparks.toLocaleString()} Sparks 🔥</p>
             </div>
-            <p className="text-xs sm:text-base opacity-80 font-mono text-yellow-800 dark:text-yellow-200">{truncatedAddress}</p>
+            <div className="absolute bottom-0 left-0 w-full flex justify-between items-center px-4 sm:px-8 py-2 sm:py-4 text-xs sm:text-base text-yellow-800 dark:text-yellow-200">
+              <span className="opacity-90">Created with ❤️ by @magicianafk</span>
+              <span className="font-mono opacity-80">{truncatedAddress}</span>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div className="text-xs sm:text-base opacity-90 flex items-center gap-2 text-yellow-800 dark:text-yellow-200 absolute bottom-2 sm:bottom-4 left-4 sm:left-8">
-        Created with ❤️ by @magicianafk
       </div>
     </Card>
   );
 });
 
 ShareCard.displayName = 'ShareCard';
+
