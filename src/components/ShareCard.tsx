@@ -39,26 +39,28 @@ export const ShareCard = React.forwardRef<HTMLDivElement, ShareCardProps>(({ spa
       <div className="absolute top-0 right-0 w-24 sm:w-48 h-24 sm:h-48 bg-yellow-500/10 rounded-full -translate-y-1/2 translate-x-1/2" />
       <div className="absolute bottom-0 left-0 w-16 sm:w-32 h-16 sm:h-32 bg-yellow-500/10 rounded-full translate-y-1/2 -translate-x-1/2" />
       
-      <div className="space-y-4 sm:space-y-8 relative">
+      <div className="flex flex-col h-full relative">
         <h2 className="text-2xl sm:text-6xl font-serif tracking-tight text-yellow-950 dark:text-yellow-50">Firewall Genesis</h2>
         
-        <div className="space-y-3 sm:space-y-6">
+        <div className="flex-grow mt-2 sm:mt-4">
           {rank && (
-            <div className="flex items-center gap-2 text-yellow-600 dark:text-yellow-400">
-              <Trophy className="w-4 h-4 sm:w-7 sm:h-7" />
+            <div className="flex items-center gap-2 text-yellow-600 dark:text-yellow-400 mb-2 sm:mb-4">
+              <Trophy className="w-4 h-4 sm:w-6 sm:h-6" />
               <span className="text-lg sm:text-2xl font-bold">Rank #{rank}</span>
             </div>
           )}
           
-          <div className="space-y-2 sm:space-y-4">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <p className="text-xl sm:text-4xl font-bold">{sparks.toLocaleString()} Sparks 🔥</p>
-            </div>
-            <div className="absolute bottom-0 left-0 w-full flex justify-between items-center px-4 sm:px-8 py-2 sm:py-4 text-xs sm:text-base text-yellow-800 dark:text-yellow-200">
-              <span className="opacity-90">Created with ❤️ by @magicianafk</span>
-              <span className="font-mono opacity-80">{truncatedAddress}</span>
-            </div>
+          <div>
+            <p className="text-xl sm:text-4xl font-bold">{sparks.toLocaleString()} Sparks 🔥</p>
           </div>
+        </div>
+
+        <div className="absolute bottom-0 right-0 w-full text-right pr-4 sm:pr-8 pb-2 sm:pb-4">
+          <span className="font-mono text-xs sm:text-sm text-yellow-800/80 dark:text-yellow-200/80">{truncatedAddress}</span>
+        </div>
+
+        <div className="absolute bottom-0 left-0 pl-4 sm:pl-8 pb-2 sm:pb-4">
+          <span className="text-xs sm:text-sm text-yellow-800/90 dark:text-yellow-200/90">Created with ❤️ by @magicianafk</span>
         </div>
       </div>
     </Card>
