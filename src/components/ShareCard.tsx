@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Trophy } from 'lucide-react';
@@ -35,7 +34,6 @@ export const ShareCard = React.forwardRef<HTMLDivElement, ShareCardProps>(({ spa
         height: cardSize.height
       }}
     >
-      {/* Decorative circles */}
       <div className="absolute top-0 right-0 w-24 sm:w-48 h-24 sm:h-48 bg-yellow-500/10 rounded-full -translate-y-1/2 translate-x-1/2" />
       <div className="absolute bottom-0 left-0 w-16 sm:w-32 h-16 sm:h-32 bg-yellow-500/10 rounded-full translate-y-1/2 -translate-x-1/2" />
       
@@ -55,11 +53,8 @@ export const ShareCard = React.forwardRef<HTMLDivElement, ShareCardProps>(({ spa
           </div>
         </div>
 
-        <div className="flex-grow flex items-center">
+        <div className="flex-grow flex flex-col justify-center space-y-2">
           <p className="text-xl sm:text-4xl font-bold">{sparks.toLocaleString()} Sparks 🔥</p>
-        </div>
-
-        <div className="absolute bottom-0 left-0 pl-4 sm:pl-8 pb-1 sm:pb-2">
           <span className="text-[10px] sm:text-xs text-yellow-800/90 dark:text-yellow-200/90">Created with ❤️ by @magicianafk</span>
         </div>
       </div>
