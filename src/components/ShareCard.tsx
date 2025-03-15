@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Trophy } from 'lucide-react';
+import { Trophy, Heart } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ShareCardProps {
@@ -55,7 +56,17 @@ export const ShareCard = React.forwardRef<HTMLDivElement, ShareCardProps>(({ spa
 
         <div className="flex-grow flex flex-col justify-center space-y-2">
           <p className="text-xl sm:text-4xl font-bold">{sparks.toLocaleString()} Sparks 🔥</p>
-          <span className="text-[10px] sm:text-xs text-yellow-800/90 dark:text-yellow-200/90">Created with ❤️ by @magicianafk</span>
+          <div className="flex items-center justify-center gap-1.5 text-[10px] sm:text-sm text-yellow-800/70 dark:text-yellow-200/70 font-medium">
+            Created with <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-red-500 fill-red-500" /> by{" "}
+            <a 
+              href="https://twitter.com/magicianafk" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-yellow-600 dark:hover:text-yellow-300 transition-colors"
+            >
+              @magicianafk
+            </a>
+          </div>
         </div>
       </div>
     </Card>
@@ -63,3 +74,4 @@ export const ShareCard = React.forwardRef<HTMLDivElement, ShareCardProps>(({ spa
 });
 
 ShareCard.displayName = 'ShareCard';
+
