@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { readLeaderboardData } from '@/utils/excelUtils';
 import { useToast } from "@/components/ui/use-toast";
 import { ShareModal } from '@/components/ShareModal';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface WeeklyBreakdown {
   sparks: number;
