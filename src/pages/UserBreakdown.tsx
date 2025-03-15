@@ -172,7 +172,15 @@ const UserBreakdown = () => {
 
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t">
             <div className="text-sm text-muted-foreground flex items-center gap-1.5">
-              Created with <Heart className="w-4 h-4 text-red-500 fill-red-500" /> by @magicianafk
+              Created with <Heart className="w-4 h-4 text-red-500 fill-red-500" /> by{" "}
+              <a 
+                href="https://twitter.com/magicianafk" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors"
+              >
+                @magicianafk
+              </a>
             </div>
             <Button onClick={() => setShowShareModal(true)} className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white font-semibold">
               <Share className="w-4 h-4 mr-2" />
