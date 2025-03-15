@@ -59,8 +59,8 @@ export const ShareCard = React.forwardRef<HTMLDivElement, ShareCardProps>(({ spa
           <p className="text-xl sm:text-4xl font-bold">{sparks.toLocaleString()} Sparks 🔥</p>
         </div>
 
-        <div className="absolute bottom-0 left-0 pl-4 sm:pl-8 pb-2 sm:pb-4">
-          <span className="text-xs sm:text-sm text-yellow-800/90 dark:text-yellow-200/90">Created with ❤️ by @magicianafk</span>
+        <div className="absolute bottom-0 left-0 pl-4 sm:pl-8 pb-1 sm:pb-2">
+          <span className="text-[10px] sm:text-xs text-yellow-800/90 dark:text-yellow-200/90">Created with ❤️ by @magicianafk</span>
         </div>
       </div>
     </Card>
@@ -68,4 +68,3 @@ export const ShareCard = React.forwardRef<HTMLDivElement, ShareCardProps>(({ spa
 });
 
 ShareCard.displayName = 'ShareCard';
-
