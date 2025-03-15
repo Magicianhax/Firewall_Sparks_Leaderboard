@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ShareCard } from '@/components/ShareCard';
 import { Download, Share } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-import { useIsMobile } from "@/hooks/use-is-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ShareModalProps {
   open: boolean;
