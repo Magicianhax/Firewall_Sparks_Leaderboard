@@ -24,6 +24,9 @@ export const ShareCard = React.forwardRef<HTMLDivElement, ShareCardProps>(({ spa
     fontSize: '1rem'
   };
 
+  // Format sparks with commas
+  const formattedSparks = sparks.toLocaleString();
+
   return (
     <Card 
       ref={ref} 
@@ -63,9 +66,9 @@ export const ShareCard = React.forwardRef<HTMLDivElement, ShareCardProps>(({ spa
           </div>
         </div>
 
-        <div className="flex flex-col space-y-2">
-          <p className="text-xl sm:text-4xl font-bold">{sparks.toLocaleString()} Sparks 🔥</p>
-          <div className="flex items-start text-[10px] sm:text-sm text-yellow-800/70 dark:text-yellow-200/70 font-medium">
+        <div className="flex flex-col mt-auto">
+          <p className="text-2xl sm:text-4xl font-bold leading-tight">{formattedSparks} Sparks 🔥</p>
+          <div className="flex items-center text-[10px] sm:text-sm text-yellow-800/90 dark:text-yellow-200/90 mt-1 sm:mt-2">
             Created with <Heart className="w-3 h-3 sm:w-4 sm:h-4 mx-1 text-red-500 fill-red-500" /> by{" "}
             <a 
               href="https://twitter.com/magicianafk" 
