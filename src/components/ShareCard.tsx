@@ -38,10 +38,10 @@ export const ShareCard = React.forwardRef<HTMLDivElement, ShareCardProps>(({ spa
       <div className="absolute top-0 right-0 w-24 sm:w-48 h-24 sm:h-48 bg-yellow-500/10 rounded-full -translate-y-1/2 translate-x-1/2" />
       <div className="absolute bottom-0 left-0 w-16 sm:w-32 h-16 sm:h-32 bg-yellow-500/10 rounded-full translate-y-1/2 -translate-x-1/2" />
       
-      {/* Panther Image */}
-      <div className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-14 h-14 sm:w-32 sm:h-32 opacity-90">
+      {/* Large Panther Background Image */}
+      <div className="absolute inset-0 w-full h-full opacity-15">
         <img 
-          src="/lovable-uploads/43912fe3-3a94-46b6-9732-3b26b97391dd.png" 
+          src="/lovable-uploads/827c0d1f-544b-4b8f-ba3b-d96837605492.png" 
           alt="Black Panther" 
           className="w-full h-full object-contain"
         />
