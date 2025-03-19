@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Trophy, Heart } from 'lucide-react';
+import { Trophy, Heart, Flame } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ShareCardProps {
@@ -67,7 +67,10 @@ export const ShareCard = React.forwardRef<HTMLDivElement, ShareCardProps>(({ spa
         </div>
 
         <div className="flex flex-col mt-auto">
-          <p className="text-2xl sm:text-4xl font-bold leading-tight">{formattedSparks} Sparks</p>
+          <div className="flex items-center">
+            <p className="text-2xl sm:text-4xl font-bold leading-tight">{formattedSparks} Sparks</p>
+            <Flame className="w-5 h-5 sm:w-7 sm:h-7 ml-1 text-orange-500" />
+          </div>
           <div className="flex items-center text-[10px] sm:text-sm text-yellow-800/90 dark:text-yellow-200/90 mt-1 sm:mt-2">
             Created with <Heart className="w-3 h-3 sm:w-4 sm:h-4 mx-1 text-red-500 fill-red-500" /> by{" "}
             <a 
