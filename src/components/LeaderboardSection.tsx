@@ -6,7 +6,6 @@ import { cn } from '@/lib/utils';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from "@/components/ui/skeleton";
-import { readLeaderboardData } from '@/utils/excelUtils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LeaderboardEntry {
@@ -55,21 +54,14 @@ const LeaderboardSection = ({
       setNoResults(false);
 
       try {
-        const fullData = await readLeaderboardData(1, true);
-        if (!fullData) {
-          setNoResults(true);
-          return;
-        }
-
         const searchTermLower = searchTerm.toLowerCase();
         let results: LeaderboardEntry[] = [];
 
-        const allEntries = fullData.overall.data;
-        results = allEntries
+        results = data
           .filter(entry => entry.address.toLowerCase().includes(searchTermLower))
           .map((entry, index) => ({
             ...entry,
-            rank: allEntries.findIndex(e => e.address === entry.address) + 1
+            rank: data.findIndex(e => e.address === entry.address) + 1
           }));
 
         setSearchResults(results);
@@ -84,7 +76,7 @@ const LeaderboardSection = ({
 
     const debounceTimeout = setTimeout(searchAddresses, 300);
     return () => clearTimeout(debounceTimeout);
-  }, [searchTerm]);
+  }, [searchTerm, data]);
 
   const displayData = searchTerm ? searchResults : data;
 

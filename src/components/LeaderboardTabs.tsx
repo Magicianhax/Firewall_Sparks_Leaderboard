@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LeaderboardSection from './LeaderboardSection';
@@ -32,7 +33,13 @@ const LeaderboardTabs = ({
   currentPage,
   onPageChange
 }: LeaderboardTabsProps) => {
-  const [searchTerm, setSearchTerm] = React.useState("");
+  // Use separate search terms for each tab
+  const [overallSearchTerm, setOverallSearchTerm] = React.useState("");
+  const [week1SearchTerm, setWeek1SearchTerm] = React.useState("");
+  const [week2SearchTerm, setWeek2SearchTerm] = React.useState("");
+  const [week3SearchTerm, setWeek3SearchTerm] = React.useState("");
+  const [week4SearchTerm, setWeek4SearchTerm] = React.useState("");
+  
   const isMobile = useIsMobile();
 
   return (
@@ -65,8 +72,8 @@ const LeaderboardTabs = ({
           totalPages={overallData.totalPages}
           currentPage={currentPage}
           onPageChange={onPageChange}
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
+          searchTerm={overallSearchTerm}
+          onSearchChange={setOverallSearchTerm}
         />
       </TabsContent>
       
@@ -77,8 +84,8 @@ const LeaderboardTabs = ({
           totalPages={week1Data.totalPages}
           currentPage={currentPage}
           onPageChange={onPageChange}
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
+          searchTerm={week1SearchTerm}
+          onSearchChange={setWeek1SearchTerm}
         />
       </TabsContent>
       
@@ -89,8 +96,8 @@ const LeaderboardTabs = ({
           totalPages={week2Data.totalPages}
           currentPage={currentPage}
           onPageChange={onPageChange}
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
+          searchTerm={week2SearchTerm}
+          onSearchChange={setWeek2SearchTerm}
         />
       </TabsContent>
       
@@ -101,8 +108,8 @@ const LeaderboardTabs = ({
           totalPages={week3Data.totalPages}
           currentPage={currentPage}
           onPageChange={onPageChange}
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
+          searchTerm={week3SearchTerm}
+          onSearchChange={setWeek3SearchTerm}
         />
       </TabsContent>
       
@@ -113,8 +120,8 @@ const LeaderboardTabs = ({
           totalPages={week4Data.totalPages}
           currentPage={currentPage}
           onPageChange={onPageChange}
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
+          searchTerm={week4SearchTerm}
+          onSearchChange={setWeek4SearchTerm}
         />
       </TabsContent>
     </Tabs>
