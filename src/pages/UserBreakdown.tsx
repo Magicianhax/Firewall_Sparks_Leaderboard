@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -29,69 +30,105 @@ const UserBreakdown = () => {
     week3: WeeklyBreakdown;
     week4: WeeklyBreakdown;
   } | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchBreakdown = async () => {
-      const data = await readLeaderboardData(1, true);
-      if (!data) {
+      setLoading(true);
+      try {
+        const data = await readLeaderboardData(1, true);
+        if (!data) {
+          toast({
+            title: "Error",
+            description: "Failed to load user data",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+
+        const overallData = data.overall.data.find((entry: any) => 
+          entry.address.toLowerCase() === address?.toLowerCase()
+        );
+        const week1Data = data.week1.data.find((entry: any) => 
+          entry.address.toLowerCase() === address?.toLowerCase()
+        );
+        const week2Data = data.week2.data.find((entry: any) => 
+          entry.address.toLowerCase() === address?.toLowerCase()
+        );
+        const week3Data = data.week3.data.find((entry: any) => 
+          entry.address.toLowerCase() === address?.toLowerCase()
+        );
+        const week4Data = data.week4.data.find((entry: any) => 
+          entry.address.toLowerCase() === address?.toLowerCase()
+        );
+
+        console.log("User data for each week:", {
+          overallData,
+          week1Data,
+          week2Data,
+          week3Data,
+          week4Data
+        });
+
+        const calculateRank = (data: any[], userAddress: string | undefined) => {
+          if (!userAddress) return undefined;
+          const userAddressLower = userAddress.toLowerCase();
+          const sortedData = [...data].sort((a, b) => b.sparks - a.sparks);
+          const index = sortedData.findIndex(entry => entry.address.toLowerCase() === userAddressLower);
+          return index >= 0 ? index + 1 : undefined;
+        };
+
+        const overallRank = calculateRank(data.overall.data, address);
+        const week1Rank = calculateRank(data.week1.data, address);
+        const week2Rank = calculateRank(data.week2.data, address);
+        const week3Rank = calculateRank(data.week3.data, address);
+        const week4Rank = calculateRank(data.week4.data, address);
+
+        const userBreakdown = {
+          overall: overallData?.sparks || 0,
+          overallRank,
+          week1: {
+            sparks: week1Data?.sparks || 0,
+            hotSlothVerification: week1Data?.hotSlothVerification,
+            rank: week1Rank,
+          },
+          week2: {
+            sparks: week2Data?.sparks || 0,
+            nftCollection: week2Data?.nftCollection,
+            rank: week2Rank,
+          },
+          week3: {
+            sparks: week3Data?.sparks || 0,
+            referralBonus: week3Data?.referralBonus,
+            rank: week3Rank,
+          },
+          week4: {
+            sparks: week4Data?.sparks || 0,
+            rank: week4Rank,
+          },
+        };
+
+        console.log("User breakdown:", userBreakdown);
+        setBreakdown(userBreakdown);
+      } catch (error) {
+        console.error("Error fetching user breakdown:", error);
         toast({
           title: "Error",
           description: "Failed to load user data",
           variant: "destructive",
         });
-        return;
+      } finally {
+        setLoading(false);
       }
-
-      const overallData = data.overall.data.find((entry: any) => entry.address === address);
-      const week1Data = data.week1.data.find((entry: any) => entry.address === address);
-      const week2Data = data.week2.data.find((entry: any) => entry.address === address);
-      const week3Data = data.week3.data.find((entry: any) => entry.address === address);
-      const week4Data = data.week4.data.find((entry: any) => entry.address === address);
-
-      const calculateRank = (data: any[], userAddress: string | undefined) => {
-        if (!userAddress) return undefined;
-        const sortedData = [...data].sort((a, b) => b.sparks - a.sparks);
-        const index = sortedData.findIndex(entry => entry.address === userAddress);
-        return index >= 0 ? index + 1 : undefined;
-      };
-
-      const overallRank = calculateRank(data.overall.data, address);
-      const week1Rank = calculateRank(data.week1.data, address);
-      const week2Rank = calculateRank(data.week2.data, address);
-      const week3Rank = calculateRank(data.week3.data, address);
-      const week4Rank = calculateRank(data.week4.data, address);
-
-      const userBreakdown = {
-        overall: overallData?.sparks || 0,
-        overallRank,
-        week1: {
-          sparks: week1Data?.sparks || 0,
-          hotSlothVerification: week1Data?.hotSlothVerification,
-          rank: week1Rank,
-        },
-        week2: {
-          sparks: week2Data?.sparks || 0,
-          nftCollection: week2Data?.nftCollection,
-          rank: week2Rank,
-        },
-        week3: {
-          sparks: week3Data?.sparks || 0,
-          referralBonus: week3Data?.referralBonus,
-          rank: week3Rank,
-        },
-        week4: {
-          sparks: week4Data?.sparks || 0,
-          rank: week4Rank,
-        },
-      };
-
-      setBreakdown(userBreakdown);
     };
 
-    fetchBreakdown();
+    if (address) {
+      fetchBreakdown();
+    }
   }, [address, toast]);
 
-  if (!breakdown) {
+  if (loading || !breakdown) {
     return (
       <div className="min-h-screen p-3 sm:p-6 bg-gradient-to-br from-yellow-50 to-white dark:from-yellow-900/10 dark:to-background">
         <div className="container mx-auto space-y-4 sm:space-y-6 max-w-4xl">
@@ -157,10 +194,10 @@ const UserBreakdown = () => {
             <span className="font-mono text-sm sm:text-base break-all">{address}</span>
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <div className="flex items-center">
-                <span className="font-bold text-lg sm:text-xl">{breakdown?.overall}</span>
+                <span className="font-bold text-lg sm:text-xl">{breakdown.overall}</span>
                 <span className="text-yellow-500 ml-1">🔥</span>
               </div>
-              {breakdown?.overallRank && (
+              {breakdown.overallRank && (
                 <div className="flex items-center text-sm">
                   <Trophy className="h-4 w-4 mr-1 text-yellow-600" />
                   <span>Overall Rank: {renderRank(breakdown.overallRank)}</span>
@@ -170,46 +207,95 @@ const UserBreakdown = () => {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            {[1, 2, 3, 4].map((week) => {
-              const weekData = breakdown?.[`week${week}` as keyof typeof breakdown] as WeeklyBreakdown;
-              return (
-                <Card key={week} className="p-4 bg-secondary/50">
-                  <h3 className="font-semibold mb-3 flex justify-between items-center">
-                    <span>Week {week}</span>
-                    {weekData?.rank && (
-                      <span className="text-sm flex items-center gap-1">
-                        <Trophy className="h-3 w-3 text-yellow-600" />
-                        Rank: {renderRank(weekData.rank)}
-                      </span>
-                    )}
-                  </h3>
-                  <div className="space-y-2.5">
-                    <div className="flex justify-between items-center">
-                      <span>Sparks</span>
-                      <span className="font-semibold">{weekData?.sparks} 🔥</span>
-                    </div>
-                    {weekData?.hotSlothVerification && (
-                      <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
-                        <span>Hot Sloth Verification</span>
-                        <span className="break-all">{weekData.hotSlothVerification}</span>
-                      </div>
-                    )}
-                    {weekData?.nftCollection && (
-                      <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
-                        <span>NFT Collection</span>
-                        <span className="break-all">{weekData.nftCollection}</span>
-                      </div>
-                    )}
-                    {weekData?.referralBonus && (
-                      <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
-                        <span>Referral Bonus</span>
-                        <span className="break-all">{weekData.referralBonus}</span>
-                      </div>
-                    )}
+            <Card className="p-4 bg-secondary/50">
+              <h3 className="font-semibold mb-3 flex justify-between items-center">
+                <span>Week 1</span>
+                {breakdown.week1.rank && (
+                  <span className="text-sm flex items-center gap-1">
+                    <Trophy className="h-3 w-3 text-yellow-600" />
+                    Rank: {renderRank(breakdown.week1.rank)}
+                  </span>
+                )}
+              </h3>
+              <div className="space-y-2.5">
+                <div className="flex justify-between items-center">
+                  <span>Sparks</span>
+                  <span className="font-semibold">{breakdown.week1.sparks} 🔥</span>
+                </div>
+                {breakdown.week1.hotSlothVerification && (
+                  <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
+                    <span>Hot Sloth Verification</span>
+                    <span className="break-all">{breakdown.week1.hotSlothVerification}</span>
                   </div>
-                </Card>
-              );
-            })}
+                )}
+              </div>
+            </Card>
+
+            <Card className="p-4 bg-secondary/50">
+              <h3 className="font-semibold mb-3 flex justify-between items-center">
+                <span>Week 2</span>
+                {breakdown.week2.rank && (
+                  <span className="text-sm flex items-center gap-1">
+                    <Trophy className="h-3 w-3 text-yellow-600" />
+                    Rank: {renderRank(breakdown.week2.rank)}
+                  </span>
+                )}
+              </h3>
+              <div className="space-y-2.5">
+                <div className="flex justify-between items-center">
+                  <span>Sparks</span>
+                  <span className="font-semibold">{breakdown.week2.sparks} 🔥</span>
+                </div>
+                {breakdown.week2.nftCollection && (
+                  <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
+                    <span>NFT Collection</span>
+                    <span className="break-all">{breakdown.week2.nftCollection}</span>
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            <Card className="p-4 bg-secondary/50">
+              <h3 className="font-semibold mb-3 flex justify-between items-center">
+                <span>Week 3</span>
+                {breakdown.week3.rank && (
+                  <span className="text-sm flex items-center gap-1">
+                    <Trophy className="h-3 w-3 text-yellow-600" />
+                    Rank: {renderRank(breakdown.week3.rank)}
+                  </span>
+                )}
+              </h3>
+              <div className="space-y-2.5">
+                <div className="flex justify-between items-center">
+                  <span>Sparks</span>
+                  <span className="font-semibold">{breakdown.week3.sparks} 🔥</span>
+                </div>
+                {breakdown.week3.referralBonus && (
+                  <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
+                    <span>Referral Bonus</span>
+                    <span className="break-all">{breakdown.week3.referralBonus}</span>
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            <Card className="p-4 bg-secondary/50">
+              <h3 className="font-semibold mb-3 flex justify-between items-center">
+                <span>Week 4</span>
+                {breakdown.week4.rank && (
+                  <span className="text-sm flex items-center gap-1">
+                    <Trophy className="h-3 w-3 text-yellow-600" />
+                    Rank: {renderRank(breakdown.week4.rank)}
+                  </span>
+                )}
+              </h3>
+              <div className="space-y-2.5">
+                <div className="flex justify-between items-center">
+                  <span>Sparks</span>
+                  <span className="font-semibold">{breakdown.week4.sparks} 🔥</span>
+                </div>
+              </div>
+            </Card>
           </div>
 
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t">
@@ -235,9 +321,9 @@ const UserBreakdown = () => {
       <ShareModal 
         open={showShareModal}
         onOpenChange={setShowShareModal}
-        sparks={breakdown?.overall || 0}
+        sparks={breakdown.overall || 0}
         address={address || ''}
-        rank={breakdown?.overallRank}
+        rank={breakdown.overallRank}
       />
     </div>
   );
