@@ -20,6 +20,7 @@ interface LeaderboardEntry {
 interface LeaderboardSectionProps {
   title: string;
   data: LeaderboardEntry[];
+  fullData: LeaderboardEntry[];
   searchTerm: string;
   onSearchChange: (value: string) => void;
   totalPages: number;
@@ -30,6 +31,7 @@ interface LeaderboardSectionProps {
 const LeaderboardSection = ({ 
   title, 
   data, 
+  fullData = [],
   searchTerm, 
   onSearchChange,
   totalPages,
@@ -57,11 +59,13 @@ const LeaderboardSection = ({
         const searchTermLower = searchTerm.toLowerCase();
         let results: LeaderboardEntry[] = [];
 
-        results = data
+        const dataToSearch = fullData.length > 0 ? fullData : data;
+        
+        results = dataToSearch
           .filter(entry => entry.address.toLowerCase().includes(searchTermLower))
           .map((entry, index) => ({
             ...entry,
-            rank: data.findIndex(e => e.address === entry.address) + 1
+            rank: dataToSearch.findIndex(e => e.address === entry.address) + 1
           }));
 
         setSearchResults(results);
@@ -76,7 +80,7 @@ const LeaderboardSection = ({
 
     const debounceTimeout = setTimeout(searchAddresses, 300);
     return () => clearTimeout(debounceTimeout);
-  }, [searchTerm, data]);
+  }, [searchTerm, data, fullData]);
 
   const displayData = searchTerm ? searchResults : data;
 

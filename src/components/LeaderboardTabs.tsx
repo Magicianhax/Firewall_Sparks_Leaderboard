@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LeaderboardSection from './LeaderboardSection';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { readLeaderboardData } from '@/utils/excelUtils';
 
 interface LeaderboardData {
   address: string;
@@ -40,7 +41,40 @@ const LeaderboardTabs = ({
   const [week3SearchTerm, setWeek3SearchTerm] = React.useState("");
   const [week4SearchTerm, setWeek4SearchTerm] = React.useState("");
   
+  // State to hold full data for searching
+  const [fullData, setFullData] = useState<{
+    overall: LeaderboardData[];
+    week1: LeaderboardData[];
+    week2: LeaderboardData[];
+    week3: LeaderboardData[];
+    week4: LeaderboardData[];
+  }>({
+    overall: [],
+    week1: [],
+    week2: [],
+    week3: [],
+    week4: []
+  });
+  
   const isMobile = useIsMobile();
+
+  // Load full data for searching
+  useEffect(() => {
+    const loadFullData = async () => {
+      const data = await readLeaderboardData(1, true);
+      if (data) {
+        setFullData({
+          overall: data.overall.data,
+          week1: data.week1.data,
+          week2: data.week2.data,
+          week3: data.week3.data,
+          week4: data.week4.data,
+        });
+      }
+    };
+    
+    loadFullData();
+  }, []);
 
   return (
     <Tabs defaultValue="overall" className="w-full max-w-4xl mx-auto space-y-4 sm:space-y-6">
@@ -69,6 +103,7 @@ const LeaderboardTabs = ({
         <LeaderboardSection
           title="Firewall Sparks Leaderboard"
           data={overallData.data}
+          fullData={fullData.overall}
           totalPages={overallData.totalPages}
           currentPage={currentPage}
           onPageChange={onPageChange}
@@ -81,6 +116,7 @@ const LeaderboardTabs = ({
         <LeaderboardSection
           title="Week 1 Leaderboard"
           data={week1Data.data}
+          fullData={fullData.week1}
           totalPages={week1Data.totalPages}
           currentPage={currentPage}
           onPageChange={onPageChange}
@@ -93,6 +129,7 @@ const LeaderboardTabs = ({
         <LeaderboardSection
           title="Week 2 Leaderboard"
           data={week2Data.data}
+          fullData={fullData.week2}
           totalPages={week2Data.totalPages}
           currentPage={currentPage}
           onPageChange={onPageChange}
@@ -105,6 +142,7 @@ const LeaderboardTabs = ({
         <LeaderboardSection
           title="Week 3 Leaderboard"
           data={week3Data.data}
+          fullData={fullData.week3}
           totalPages={week3Data.totalPages}
           currentPage={currentPage}
           onPageChange={onPageChange}
@@ -117,6 +155,7 @@ const LeaderboardTabs = ({
         <LeaderboardSection
           title="Week 4 Leaderboard"
           data={week4Data.data}
+          fullData={fullData.week4}
           totalPages={week4Data.totalPages}
           currentPage={currentPage}
           onPageChange={onPageChange}
