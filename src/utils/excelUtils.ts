@@ -49,11 +49,11 @@ function parseOverallSheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // For overall sheet, headers are on row 1 (index 1)
-  const headers = rawData[1] || {};
+  // For overall sheet, headers are directly in the first row (index 0)
+  const headers = rawData[0] || {};
   console.log(`Overall sheet headers:`, headers);
   
-  const formattedData = rawData.slice(2).map((row: any) => {
+  const formattedData = rawData.slice(1).map((row: any) => {
     const addressKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase() === 'address'
     ) || 'A';
@@ -100,7 +100,7 @@ function parseWeek1Sheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // For week 1 sheet, headers are on row 0 (index 0)
+  // For week 1 sheet, headers are in the first row (index 0)
   const headers = rawData[0] || {};
   console.log(`Week 1 sheet headers:`, headers);
   
@@ -156,7 +156,7 @@ function parseWeek2Sheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // For week 2 sheet only, headers are on row 1 (index 1)
+  // For week 2 sheet only, skip the time period row, headers are on row 1 (index 1)
   const headers = rawData[1] || {};
   console.log(`Week 2 sheet headers:`, headers);
   
@@ -213,7 +213,7 @@ function parseWeek3Sheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // For week 3 sheet, headers are on row 0 (index 0)
+  // For week 3 sheet, headers are in the first row (index 0)
   const headers = rawData[0] || {};
   console.log(`Week 3 sheet headers:`, headers);
   
@@ -269,7 +269,7 @@ function parseWeek4Sheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // For week 4 sheet, headers are on row 0 (index 0)
+  // For week 4 sheet, headers are in the first row (index 0)
   const headers = rawData[0] || {};
   console.log(`Week 4 sheet headers:`, headers);
   
