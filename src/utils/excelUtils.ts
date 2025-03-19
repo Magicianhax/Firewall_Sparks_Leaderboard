@@ -1,3 +1,4 @@
+
 import * as XLSX from 'xlsx';
 
 export interface LeaderboardData {
@@ -48,6 +49,7 @@ function parseOverallSheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
+  // For overall sheet, headers are on row 1 (index 1)
   const headers = rawData[1] || {};
   console.log(`Overall sheet headers:`, headers);
   
@@ -98,6 +100,7 @@ function parseWeek1Sheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
+  // For week 1 sheet, headers are on row 0 (index 0)
   const headers = rawData[0] || {};
   console.log(`Week 1 sheet headers:`, headers);
   
@@ -153,6 +156,7 @@ function parseWeek2Sheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
+  // For week 2 sheet only, headers are on row 1 (index 1)
   const headers = rawData[1] || {};
   console.log(`Week 2 sheet headers:`, headers);
   
@@ -209,6 +213,7 @@ function parseWeek3Sheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
+  // For week 3 sheet, headers are on row 0 (index 0)
   const headers = rawData[0] || {};
   console.log(`Week 3 sheet headers:`, headers);
   
@@ -264,6 +269,7 @@ function parseWeek4Sheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
+  // For week 4 sheet, headers are on row 0 (index 0)
   const headers = rawData[0] || {};
   console.log(`Week 4 sheet headers:`, headers);
   
