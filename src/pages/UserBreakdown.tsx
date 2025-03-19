@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, Heart, Share } from 'lucide-react';
+import { ArrowLeft, Heart, Share, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { readLeaderboardData } from '@/utils/excelUtils';
 import { useToast } from "@/components/ui/use-toast";
@@ -14,6 +14,7 @@ interface WeeklyBreakdown {
   hotSlothVerification?: string;
   nftCollection?: string;
   referralBonus?: string;
+  rank?: number;
 }
 
 const UserBreakdown = () => {
@@ -23,12 +24,12 @@ const UserBreakdown = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [breakdown, setBreakdown] = useState<{
     overall: number;
+    overallRank?: number;
     week1: WeeklyBreakdown;
     week2: WeeklyBreakdown;
     week3: WeeklyBreakdown;
     week4: WeeklyBreakdown;
   } | null>(null);
-  const [rank, setRank] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     const fetchBreakdown = async () => {
@@ -42,34 +43,55 @@ const UserBreakdown = () => {
         return;
       }
 
+      // Find the user data in each week
       const overallData = data.overall.data.find((entry: any) => entry.address === address);
       const week1Data = data.week1.data.find((entry: any) => entry.address === address);
       const week2Data = data.week2.data.find((entry: any) => entry.address === address);
       const week3Data = data.week3.data.find((entry: any) => entry.address === address);
       const week4Data = data.week4.data.find((entry: any) => entry.address === address);
 
-      const userRank = data.overall.data
+      // Calculate ranks for overall and each week
+      const overallRank = data.overall.data
         .sort((a: any, b: any) => b.sparks - a.sparks)
         .findIndex((entry: any) => entry.address === address) + 1;
 
-      setRank(userRank > 0 ? userRank : undefined);
+      const week1Rank = data.week1.data
+        .sort((a: any, b: any) => b.sparks - a.sparks)
+        .findIndex((entry: any) => entry.address === address) + 1;
+
+      const week2Rank = data.week2.data
+        .sort((a: any, b: any) => b.sparks - a.sparks)
+        .findIndex((entry: any) => entry.address === address) + 1;
+
+      const week3Rank = data.week3.data
+        .sort((a: any, b: any) => b.sparks - a.sparks)
+        .findIndex((entry: any) => entry.address === address) + 1;
+
+      const week4Rank = data.week4.data
+        .sort((a: any, b: any) => b.sparks - a.sparks)
+        .findIndex((entry: any) => entry.address === address) + 1;
 
       const userBreakdown = {
         overall: overallData?.sparks || 0,
+        overallRank: overallRank > 0 ? overallRank : undefined,
         week1: {
           sparks: week1Data?.sparks || 0,
           hotSlothVerification: week1Data?.hotSlothVerification,
+          rank: week1Rank > 0 ? week1Rank : undefined,
         },
         week2: {
           sparks: week2Data?.sparks || 0,
           nftCollection: week2Data?.nftCollection,
+          rank: week2Rank > 0 ? week2Rank : undefined,
         },
         week3: {
           sparks: week3Data?.sparks || 0,
           referralBonus: week3Data?.referralBonus,
+          rank: week3Rank > 0 ? week3Rank : undefined,
         },
         week4: {
           sparks: week4Data?.sparks || 0,
+          rank: week4Rank > 0 ? week4Rank : undefined,
         },
       };
 
@@ -98,6 +120,20 @@ const UserBreakdown = () => {
       </div>
     );
   }
+
+  // Helper function to render rank with appropriate styling
+  const renderRank = (rank?: number) => {
+    if (!rank) return "Not ranked";
+    
+    let rankClass = "";
+    if (rank === 1) rankClass = "text-yellow-500 font-bold";
+    else if (rank === 2) rankClass = "text-gray-400 font-bold";
+    else if (rank === 3) rankClass = "text-amber-600 font-bold";
+    
+    return (
+      <span className={rankClass}>#{rank}</span>
+    );
+  };
 
   return (
     <div className="min-h-screen p-3 sm:p-6 bg-gradient-to-br from-yellow-50 to-white dark:from-yellow-900/10 dark:to-background">
@@ -130,9 +166,17 @@ const UserBreakdown = () => {
         <Card className="p-6 space-y-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-4 border-b gap-2">
             <span className="font-mono text-sm sm:text-base break-all">{address}</span>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-lg sm:text-xl">{breakdown.overall}</span>
-              <span className="text-yellow-500">🔥</span>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <div className="flex items-center">
+                <span className="font-bold text-lg sm:text-xl">{breakdown.overall}</span>
+                <span className="text-yellow-500 ml-1">🔥</span>
+              </div>
+              {breakdown.overallRank && (
+                <div className="flex items-center text-sm">
+                  <Trophy className="h-4 w-4 mr-1 text-yellow-600" />
+                  <span>Overall Rank: {renderRank(breakdown.overallRank)}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -141,7 +185,15 @@ const UserBreakdown = () => {
               const weekData = breakdown[`week${week}` as keyof typeof breakdown] as WeeklyBreakdown;
               return (
                 <Card key={week} className="p-4 bg-secondary/50">
-                  <h3 className="font-semibold mb-3">Week {week}</h3>
+                  <h3 className="font-semibold mb-3 flex justify-between items-center">
+                    <span>Week {week}</span>
+                    {weekData.rank && (
+                      <span className="text-sm flex items-center gap-1">
+                        <Trophy className="h-3 w-3 text-yellow-600" />
+                        Rank: {renderRank(weekData.rank)}
+                      </span>
+                    )}
+                  </h3>
                   <div className="space-y-2.5">
                     <div className="flex justify-between items-center">
                       <span>Sparks</span>
@@ -196,7 +248,7 @@ const UserBreakdown = () => {
         onOpenChange={setShowShareModal}
         sparks={breakdown.overall}
         address={address || ''}
-        rank={rank}
+        rank={breakdown.overallRank}
       />
     </div>
   );
