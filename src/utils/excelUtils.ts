@@ -5,7 +5,7 @@ export interface LeaderboardData {
   sparks: number;
   nftCollection?: string; // Only for week 2
   hotSlothVerification?: string; // Only for week 1
-  referralBonus?: string; // Only for week 3
+  referralBonus?: string; // Only for weeks 3, 4, and 5
 }
 
 export interface LeaderboardResponse {
@@ -43,21 +43,41 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
     const sheetNames = workbook.SheetNames;
     console.log("Available sheets in Excel file:", sheetNames);
     
-    const week5SheetName = sheetNames.find(name => 
-      name.toLowerCase() === 'week 5' || 
-      name.toLowerCase() === 'week5'
-    );
+    // Look for exact sheet names as provided in the image
+    const leaderboardSheet = findSheet(sheetNames, 'Leaderboard');
+    const week1Sheet = findSheet(sheetNames, 'week 1');
+    const week2Sheet = findSheet(sheetNames, 'week 2');
+    const week3Sheet = findSheet(sheetNames, 'week 3');
+    const week4Sheet = findSheet(sheetNames, 'week 4');
+    const week5Sheet = findSheet(sheetNames, 'week 5');
     
-    console.log("Week 5 sheet found:", week5SheetName);
+    console.log("Found sheets:", {
+      leaderboard: leaderboardSheet,
+      week1: week1Sheet,
+      week2: week2Sheet,
+      week3: week3Sheet,
+      week4: week4Sheet,
+      week5: week5Sheet
+    });
     
     return {
-      overall: parseOverallSheet(workbook, 'Firewall_Sparks_Leaderboard', page, fullData),
-      week1: parseWeek1Sheet(workbook, 'week 1', page, fullData),
-      week2: parseWeek2Sheet(workbook, 'week 2', page, fullData),
-      week3: parseWeek3Sheet(workbook, 'week 3', page, fullData),
-      week4: parseWeek4Sheet(workbook, 'week 4', page, fullData),
-      week5: week5SheetName ? 
-        parseWeek5Sheet(workbook, week5SheetName, page, fullData) : 
+      overall: leaderboardSheet ? 
+        parseLeaderboardSheet(workbook, leaderboardSheet, page, fullData) : 
+        { data: [], totalPages: 0 },
+      week1: week1Sheet ? 
+        parseWeek1Sheet(workbook, week1Sheet, page, fullData) : 
+        { data: [], totalPages: 0 },
+      week2: week2Sheet ? 
+        parseWeek2Sheet(workbook, week2Sheet, page, fullData) : 
+        { data: [], totalPages: 0 },
+      week3: week3Sheet ? 
+        parseWeek3Sheet(workbook, week3Sheet, page, fullData) : 
+        { data: [], totalPages: 0 },
+      week4: week4Sheet ? 
+        parseWeek4Sheet(workbook, week4Sheet, page, fullData) : 
+        { data: [], totalPages: 0 },
+      week5: week5Sheet ? 
+        parseWeek5Sheet(workbook, week5Sheet, page, fullData) : 
         { data: [], totalPages: 0 },
     };
   } catch (error) {
@@ -66,6 +86,16 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
     console.log("Using mock data for development");
     return generateBetterMockData(page, fullData);
   }
+}
+
+// Helper function to find the exact sheet name
+function findSheet(sheetNames: string[], targetName: string): string | undefined {
+  // Try to find exact match first
+  const exactMatch = sheetNames.find(name => name.toLowerCase() === targetName.toLowerCase());
+  if (exactMatch) return exactMatch;
+  
+  // If no exact match, try to find a sheet that contains the name
+  return sheetNames.find(name => name.toLowerCase().includes(targetName.toLowerCase()));
 }
 
 function generateBetterMockData(page: number, fullData: boolean) {
@@ -113,7 +143,8 @@ function generateBetterMockData(page: number, fullData: boolean) {
         sparks,
         ...(prefix === 'week1' ? { hotSlothVerification: Math.random() > 0.5 ? 'Yes' : 'No' } : {}),
         ...(prefix === 'week2' ? { nftCollection: `Collection ${i % 5}` } : {}),
-        ...(prefix === 'week3' ? { referralBonus: `${Math.floor(Math.random() * 100)}%` } : {})
+        ...(prefix === 'week3' || prefix === 'week4' || prefix === 'week5' ? 
+          { referralBonus: `${Math.floor(Math.random() * 100)}%` } : {})
       };
     }).sort((a, b) => b.sparks - a.sparks);
   };
@@ -152,41 +183,31 @@ function generateBetterMockData(page: number, fullData: boolean) {
   };
 }
 
-function parseOverallSheet(
+// Function to parse the main Leaderboard sheet (with Address and 🔥Sparks columns)
+function parseLeaderboardSheet(
   workbook: XLSX.WorkBook, 
   sheetName: string, 
   page: number,
   fullData: boolean = false
 ): LeaderboardResponse {
-  let sheet = workbook.Sheets[sheetName];
-  if (!sheet) {
-    const possibleNames = workbook.SheetNames.filter(name => 
-      name.toLowerCase().includes('overall') || 
-      name.toLowerCase().includes('firewall') ||
-      name.toLowerCase().includes('sparks')
-    );
-    
-    if (possibleNames.length > 0) {
-      sheet = workbook.Sheets[possibleNames[0]];
-      console.log(`Using sheet "${possibleNames[0]}" instead of "${sheetName}"`);
-    }
-  }
+  const sheet = workbook.Sheets[sheetName];
   
   if (!sheet) {
-    console.error(`Sheet for overall data not found`);
+    console.error(`Sheet "${sheetName}" not found`);
     return { data: [], totalPages: 0 };
   }
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
-  console.log("Raw overall data (first few rows):", rawData.slice(0, 3));
+  console.log("Raw Leaderboard data (first few rows):", rawData.slice(0, 3));
   
+  // Skip header row if it exists
   const skipRows = rawData.length > 0 && 
                    typeof rawData[0] === 'object' && 
                    Object.values(rawData[0]).some(val => 
-                     String(val).toLowerCase().includes('time period')) ? 1 : 0;
+                     String(val).toLowerCase().includes('address')) ? 1 : 0;
   
   const headers = rawData[skipRows] || {};
-  console.log(`Overall sheet headers:`, headers);
+  console.log(`Leaderboard sheet headers:`, headers);
   
   const formattedData = rawData.slice(skipRows + 1)
     .filter(row => row && typeof row === 'object')
@@ -223,6 +244,7 @@ function parseOverallSheet(
   };
 }
 
+// Function to parse Week 1 sheet (with Address, Hot Sloth Verification, and 🔥Sparks columns)
 function parseWeek1Sheet(
   workbook: XLSX.WorkBook, 
   sheetName: string, 
@@ -237,11 +259,13 @@ function parseWeek1Sheet(
   }
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
+  console.log("Raw Week 1 data (first few rows):", rawData.slice(0, 3));
   
+  // Skip header row if it exists
   const skipRows = rawData.length > 0 && 
                    typeof rawData[0] === 'object' &&
                    Object.values(rawData[0]).some(val => 
-                     String(val).includes('Time Period')) ? 1 : 0;
+                     String(val).toLowerCase().includes('address')) ? 1 : 0;
   
   const headers = rawData[skipRows] || {};
   console.log(`Week 1 sheet headers:`, headers);
@@ -254,7 +278,8 @@ function parseWeek1Sheet(
       ) || 'A';
       
       const verificationKey = Object.keys(headers).find(
-        key => String(headers[key]).toLowerCase().includes('sloth')
+        key => String(headers[key]).toLowerCase().includes('sloth') || 
+              String(headers[key]).toLowerCase().includes('verification')
       ) || 'B';
       
       const sparksKey = Object.keys(headers).find(
@@ -289,6 +314,7 @@ function parseWeek1Sheet(
   };
 }
 
+// Function to parse Week 2 sheet (with Address, NFT Collection, and 🔥Sparks columns)
 function parseWeek2Sheet(
   workbook: XLSX.WorkBook, 
   sheetName: string, 
@@ -303,11 +329,13 @@ function parseWeek2Sheet(
   }
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
+  console.log("Raw Week 2 data (first few rows):", rawData.slice(0, 3));
   
+  // Skip header row if it exists
   const skipRows = rawData.length > 0 && 
                    typeof rawData[0] === 'object' &&
                    Object.values(rawData[0]).some(val => 
-                     String(val).includes('Time Period')) ? 1 : 0;
+                     String(val).toLowerCase().includes('address')) ? 1 : 0;
   
   const headers = rawData[skipRows] || {};
   console.log(`Week 2 sheet headers:`, headers);
@@ -321,7 +349,7 @@ function parseWeek2Sheet(
       
       const nftKey = Object.keys(headers).find(
         key => String(headers[key]).toLowerCase().includes('nft') || 
-               String(headers[key]).toLowerCase().includes('collection')
+              String(headers[key]).toLowerCase().includes('collection')
       ) || 'B';
       
       const sparksKey = Object.keys(headers).find(
@@ -356,7 +384,8 @@ function parseWeek2Sheet(
   };
 }
 
-function parseWeek3Sheet(
+// Function to parse Weeks 3, 4, and 5 sheets (with Address, 🔥Sparks, and Referral Bonus columns)
+function parseWeek3to5Sheet(
   workbook: XLSX.WorkBook, 
   sheetName: string, 
   page: number,
@@ -370,14 +399,16 @@ function parseWeek3Sheet(
   }
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
+  console.log(`Raw ${sheetName} data (first few rows):`, rawData.slice(0, 3));
   
+  // Skip header row if it exists
   const skipRows = rawData.length > 0 && 
                    typeof rawData[0] === 'object' &&
                    Object.values(rawData[0]).some(val => 
-                     String(val).includes('Time Period')) ? 1 : 0;
+                     String(val).toLowerCase().includes('address')) ? 1 : 0;
   
   const headers = rawData[skipRows] || {};
-  console.log(`Week 3 sheet headers:`, headers);
+  console.log(`${sheetName} sheet headers:`, headers);
   
   const formattedData = rawData.slice(skipRows + 1)
     .filter(row => row && typeof row === 'object')
@@ -422,125 +453,7 @@ function parseWeek3Sheet(
   };
 }
 
-function parseWeek4Sheet(
-  workbook: XLSX.WorkBook, 
-  sheetName: string, 
-  page: number,
-  fullData: boolean = false
-): LeaderboardResponse {
-  const sheet = workbook.Sheets[sheetName];
-  
-  if (!sheet) {
-    console.error(`Sheet "${sheetName}" not found`);
-    return { data: [], totalPages: 0 };
-  }
-
-  const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
-  
-  const skipRows = rawData.length > 0 && 
-                   typeof rawData[0] === 'object' &&
-                   Object.values(rawData[0]).some(val => 
-                     String(val).includes('Time Period')) ? 1 : 0;
-  
-  const headers = rawData[skipRows] || {};
-  console.log(`Week 4 sheet headers:`, headers);
-  
-  const formattedData = rawData.slice(skipRows + 1)
-    .filter(row => row && typeof row === 'object')
-    .map((row: any) => {
-      const addressKey = Object.keys(headers).find(
-        key => String(headers[key]).toLowerCase() === 'address'
-      ) || 'A';
-      
-      const sparksKey = Object.keys(headers).find(
-        key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
-      ) || 'B';
-      
-      const address = row[addressKey] ? String(row[addressKey]).trim() : '';
-      const sparksRaw = String(row[sparksKey] || '0').replace(/,/g, '');
-      const sparks = parseFloat(sparksRaw) || 0;
-      
-      return {
-        address,
-        sparks
-      };
-    })
-    .filter(item => item.address && !isNaN(item.sparks));
-  
-  if (fullData) {
-    return {
-      data: formattedData,
-      totalPages: Math.ceil(formattedData.length / ITEMS_PER_PAGE),
-    };
-  }
-
-  const start = (page - 1) * ITEMS_PER_PAGE;
-  const end = start + ITEMS_PER_PAGE;
-  
-  return {
-    data: formattedData.slice(start, end),
-    totalPages: Math.ceil(formattedData.length / ITEMS_PER_PAGE),
-  };
-}
-
-function parseWeek5Sheet(
-  workbook: XLSX.WorkBook, 
-  sheetName: string, 
-  page: number,
-  fullData: boolean = false
-): LeaderboardResponse {
-  const sheet = workbook.Sheets[sheetName];
-  
-  if (!sheet) {
-    console.error(`Sheet "${sheetName}" not found`);
-    return { data: [], totalPages: 0 };
-  }
-
-  const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
-  console.log("Week 5 raw data (first few rows):", rawData.slice(0, 3));
-  
-  const skipRows = rawData.length > 0 && 
-                   typeof rawData[0] === 'object' &&
-                   Object.values(rawData[0]).some(val => 
-                     String(val).toLowerCase().includes('time period')) ? 1 : 0;
-  
-  const headers = rawData[skipRows] || {};
-  console.log(`Week 5 sheet headers:`, headers);
-  
-  const formattedData = rawData.slice(skipRows + 1)
-    .filter(row => row && typeof row === 'object')
-    .map((row: any) => {
-      const addressKey = Object.keys(headers).find(
-        key => String(headers[key]).toLowerCase() === 'address'
-      ) || 'A';
-      
-      const sparksKey = Object.keys(headers).find(
-        key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
-      ) || 'B';
-      
-      const address = row[addressKey] ? String(row[addressKey]).trim() : '';
-      const sparksRaw = String(row[sparksKey] || '0').replace(/,/g, '');
-      const sparks = parseFloat(sparksRaw) || 0;
-      
-      return {
-        address,
-        sparks
-      };
-    })
-    .filter(item => item.address && !isNaN(item.sparks));
-  
-  if (fullData) {
-    return {
-      data: formattedData,
-      totalPages: Math.ceil(formattedData.length / ITEMS_PER_PAGE),
-    };
-  }
-
-  const start = (page - 1) * ITEMS_PER_PAGE;
-  const end = start + ITEMS_PER_PAGE;
-  
-  return {
-    data: formattedData.slice(start, end),
-    totalPages: Math.ceil(formattedData.length / ITEMS_PER_PAGE),
-  };
-}
+// Use the common function for weeks 3, 4, and 5 since they have the same structure
+const parseWeek3Sheet = parseWeek3to5Sheet;
+const parseWeek4Sheet = parseWeek3to5Sheet;
+const parseWeek5Sheet = parseWeek3to5Sheet;
