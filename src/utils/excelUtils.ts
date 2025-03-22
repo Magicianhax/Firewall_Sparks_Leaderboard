@@ -23,7 +23,7 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
     }
     
     const contentType = response.headers.get('content-type');
-    if (contentType && !contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+    if (!contentType || contentType.includes('text/html')) {
       console.error('Received invalid content type:', contentType);
       throw new Error('Received invalid content type for Excel file');
     }
@@ -61,23 +61,53 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
     console.error('Error reading Excel file:', error);
     
     console.log("Using mock data for development");
-    return generateMockData(page, fullData);
+    return generateBetterMockData(page, fullData);
   }
 }
 
-function generateMockData(page: number, fullData: boolean) {
+function generateBetterMockData(page: number, fullData: boolean) {
   const ITEMS_PER_PAGE = 50;
   const totalItems = 200;
   
+  const mockAddresses = [
+    "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
+    "0xD8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+    "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
+    "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1",
+    "0x1c0A5Ba639975D10902A5ca3875C87bB8E7c2009",
+    "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+    "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+    "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+  ];
+  
+  const generateAddresses = (count: number) => {
+    const addresses = [...mockAddresses];
+    
+    while (addresses.length < count) {
+      const baseAddress = mockAddresses[Math.floor(Math.random() * mockAddresses.length)];
+      const randomChar = "0123456789abcdef"[Math.floor(Math.random() * 16)];
+      const randomPosition = Math.floor(Math.random() * (baseAddress.length - 2)) + 2;
+      
+      let newAddress = baseAddress.split('');
+      newAddress[randomPosition] = randomChar;
+      addresses.push(newAddress.join(''));
+    }
+    
+    return addresses;
+  };
+  
   const generateEntries = (count: number, prefix: string) => {
-    return Array(count).fill(0).map((_, i) => {
-      const address = `0x${Array(40).fill(0).map(() => 
-        "0123456789abcdef"[Math.floor(Math.random() * 16)]
-      ).join('')}`;
+    const addresses = generateAddresses(count);
+    
+    return addresses.map((address, i) => {
+      const sparkBase = 2000000 - (i * 10000);
+      const sparks = Math.max(10000, sparkBase + Math.floor(Math.random() * 50000));
       
       return {
         address,
-        sparks: Math.floor(Math.random() * 2000000) + 100000,
+        sparks,
         ...(prefix === 'week1' ? { hotSlothVerification: Math.random() > 0.5 ? 'Yes' : 'No' } : {}),
         ...(prefix === 'week2' ? { nftCollection: `Collection ${i % 5}` } : {}),
         ...(prefix === 'week3' ? { referralBonus: `${Math.floor(Math.random() * 100)}%` } : {})
@@ -125,8 +155,6 @@ function parseOverallSheet(
   page: number,
   fullData: boolean = false
 ): LeaderboardResponse {
-  const ITEMS_PER_PAGE = 50;
-  
   let sheet = workbook.Sheets[sheetName];
   if (!sheet) {
     const possibleNames = workbook.SheetNames.filter(name => 
@@ -150,26 +178,31 @@ function parseOverallSheet(
   console.log("Raw overall data (first few rows):", rawData.slice(0, 3));
   
   const skipRows = rawData.length > 0 && 
+                   typeof rawData[0] === 'object' && 
                    Object.values(rawData[0]).some(val => 
                      String(val).toLowerCase().includes('time period')) ? 1 : 0;
   
   const headers = rawData[skipRows] || {};
   console.log(`Overall sheet headers:`, headers);
   
-  const formattedData = rawData.slice(skipRows + 1).map((row: any) => {
-    const addressKey = Object.keys(headers).find(
-      key => String(headers[key]).toLowerCase() === 'address'
-    ) || 'A';
-    
-    const sparksKey = Object.keys(headers).find(
-      key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
-    ) || 'B';
-    
-    return {
-      address: String(row[addressKey] || ''),
-      sparks: Number(String(row[sparksKey] || '0').replace(/,/g, '')) || 0
-    };
-  }).filter(item => item.address && !isNaN(item.sparks));
+  const formattedData = rawData.slice(skipRows + 1)
+    .filter(row => row && typeof row === 'object')
+    .map((row: any) => {
+      const addressKey = Object.keys(headers).find(
+        key => String(headers[key]).toLowerCase() === 'address'
+      ) || 'A';
+      
+      const sparksKey = Object.keys(headers).find(
+        key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
+      ) || 'B';
+      
+      const address = row[addressKey] ? String(row[addressKey]).trim() : '';
+      const sparksRaw = String(row[sparksKey] || '0').replace(/,/g, '');
+      const sparks = parseFloat(sparksRaw) || 0;
+      
+      return { address, sparks };
+    })
+    .filter(item => item.address && !isNaN(item.sparks));
   
   if (fullData) {
     return {
@@ -204,31 +237,39 @@ function parseWeek1Sheet(
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
   const skipRows = rawData.length > 0 && 
+                   typeof rawData[0] === 'object' &&
                    Object.values(rawData[0]).some(val => 
                      String(val).includes('Time Period')) ? 1 : 0;
   
   const headers = rawData[skipRows] || {};
   console.log(`Week 1 sheet headers:`, headers);
   
-  const formattedData = rawData.slice(skipRows + 1).map((row: any) => {
-    const addressKey = Object.keys(headers).find(
-      key => String(headers[key]).toLowerCase() === 'address'
-    ) || 'A';
-    
-    const verificationKey = Object.keys(headers).find(
-      key => String(headers[key]).toLowerCase().includes('sloth')
-    ) || 'B';
-    
-    const sparksKey = Object.keys(headers).find(
-      key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
-    ) || 'C';
-    
-    return {
-      address: String(row[addressKey] || ''),
-      sparks: Number(String(row[sparksKey]).replace(/,/g, '')) || 0,
-      hotSlothVerification: row[verificationKey] ? String(row[verificationKey]) : undefined
-    };
-  }).filter(item => item.address && !isNaN(item.sparks));
+  const formattedData = rawData.slice(skipRows + 1)
+    .filter(row => row && typeof row === 'object')
+    .map((row: any) => {
+      const addressKey = Object.keys(headers).find(
+        key => String(headers[key]).toLowerCase() === 'address'
+      ) || 'A';
+      
+      const verificationKey = Object.keys(headers).find(
+        key => String(headers[key]).toLowerCase().includes('sloth')
+      ) || 'B';
+      
+      const sparksKey = Object.keys(headers).find(
+        key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
+      ) || 'C';
+      
+      const address = row[addressKey] ? String(row[addressKey]).trim() : '';
+      const sparksRaw = String(row[sparksKey] || '0').replace(/,/g, '');
+      const sparks = parseFloat(sparksRaw) || 0;
+      
+      return {
+        address,
+        sparks,
+        hotSlothVerification: row[verificationKey] ? String(row[verificationKey]) : undefined
+      };
+    })
+    .filter(item => item.address && !isNaN(item.sparks));
   
   if (fullData) {
     return {
@@ -263,32 +304,40 @@ function parseWeek2Sheet(
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
   const skipRows = rawData.length > 0 && 
+                   typeof rawData[0] === 'object' &&
                    Object.values(rawData[0]).some(val => 
                      String(val).includes('Time Period')) ? 1 : 0;
   
   const headers = rawData[skipRows] || {};
   console.log(`Week 2 sheet headers:`, headers);
   
-  const formattedData = rawData.slice(skipRows + 1).map((row: any) => {
-    const addressKey = Object.keys(headers).find(
-      key => String(headers[key]).toLowerCase() === 'address'
-    ) || 'A';
-    
-    const nftKey = Object.keys(headers).find(
-      key => String(headers[key]).toLowerCase().includes('nft') || 
-             String(headers[key]).toLowerCase().includes('collection')
-    ) || 'B';
-    
-    const sparksKey = Object.keys(headers).find(
-      key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
-    ) || 'C';
-    
-    return {
-      address: String(row[addressKey] || ''),
-      sparks: Number(String(row[sparksKey]).replace(/,/g, '')) || 0,
-      nftCollection: row[nftKey] ? String(row[nftKey]) : undefined
-    };
-  }).filter(item => item.address && !isNaN(item.sparks));
+  const formattedData = rawData.slice(skipRows + 1)
+    .filter(row => row && typeof row === 'object')
+    .map((row: any) => {
+      const addressKey = Object.keys(headers).find(
+        key => String(headers[key]).toLowerCase() === 'address'
+      ) || 'A';
+      
+      const nftKey = Object.keys(headers).find(
+        key => String(headers[key]).toLowerCase().includes('nft') || 
+               String(headers[key]).toLowerCase().includes('collection')
+      ) || 'B';
+      
+      const sparksKey = Object.keys(headers).find(
+        key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
+      ) || 'C';
+      
+      const address = row[addressKey] ? String(row[addressKey]).trim() : '';
+      const sparksRaw = String(row[sparksKey] || '0').replace(/,/g, '');
+      const sparks = parseFloat(sparksRaw) || 0;
+      
+      return {
+        address,
+        sparks,
+        nftCollection: row[nftKey] ? String(row[nftKey]) : undefined
+      };
+    })
+    .filter(item => item.address && !isNaN(item.sparks));
   
   if (fullData) {
     return {
@@ -323,31 +372,39 @@ function parseWeek3Sheet(
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
   const skipRows = rawData.length > 0 && 
+                   typeof rawData[0] === 'object' &&
                    Object.values(rawData[0]).some(val => 
                      String(val).includes('Time Period')) ? 1 : 0;
   
   const headers = rawData[skipRows] || {};
   console.log(`Week 3 sheet headers:`, headers);
   
-  const formattedData = rawData.slice(skipRows + 1).map((row: any) => {
-    const addressKey = Object.keys(headers).find(
-      key => String(headers[key]).toLowerCase() === 'address'
-    ) || 'A';
-    
-    const sparksKey = Object.keys(headers).find(
-      key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
-    ) || 'B';
-    
-    const referralKey = Object.keys(headers).find(
-      key => String(headers[key]).toLowerCase().includes('referral')
-    ) || 'C';
-    
-    return {
-      address: String(row[addressKey] || ''),
-      sparks: Number(String(row[sparksKey]).replace(/,/g, '')) || 0,
-      referralBonus: row[referralKey] ? String(row[referralKey]) : undefined
-    };
-  }).filter(item => item.address && !isNaN(item.sparks));
+  const formattedData = rawData.slice(skipRows + 1)
+    .filter(row => row && typeof row === 'object')
+    .map((row: any) => {
+      const addressKey = Object.keys(headers).find(
+        key => String(headers[key]).toLowerCase() === 'address'
+      ) || 'A';
+      
+      const sparksKey = Object.keys(headers).find(
+        key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
+      ) || 'B';
+      
+      const referralKey = Object.keys(headers).find(
+        key => String(headers[key]).toLowerCase().includes('referral')
+      ) || 'C';
+      
+      const address = row[addressKey] ? String(row[addressKey]).trim() : '';
+      const sparksRaw = String(row[sparksKey] || '0').replace(/,/g, '');
+      const sparks = parseFloat(sparksRaw) || 0;
+      
+      return {
+        address,
+        sparks,
+        referralBonus: row[referralKey] ? String(row[referralKey]) : undefined
+      };
+    })
+    .filter(item => item.address && !isNaN(item.sparks));
   
   if (fullData) {
     return {
@@ -382,26 +439,34 @@ function parseWeek4Sheet(
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
   const skipRows = rawData.length > 0 && 
+                   typeof rawData[0] === 'object' &&
                    Object.values(rawData[0]).some(val => 
                      String(val).includes('Time Period')) ? 1 : 0;
   
   const headers = rawData[skipRows] || {};
   console.log(`Week 4 sheet headers:`, headers);
   
-  const formattedData = rawData.slice(skipRows + 1).map((row: any) => {
-    const addressKey = Object.keys(headers).find(
-      key => String(headers[key]).toLowerCase() === 'address'
-    ) || 'A';
-    
-    const sparksKey = Object.keys(headers).find(
-      key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
-    ) || 'B';
-    
-    return {
-      address: String(row[addressKey] || ''),
-      sparks: Number(String(row[sparksKey]).replace(/,/g, '')) || 0
-    };
-  }).filter(item => item.address && !isNaN(item.sparks));
+  const formattedData = rawData.slice(skipRows + 1)
+    .filter(row => row && typeof row === 'object')
+    .map((row: any) => {
+      const addressKey = Object.keys(headers).find(
+        key => String(headers[key]).toLowerCase() === 'address'
+      ) || 'A';
+      
+      const sparksKey = Object.keys(headers).find(
+        key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
+      ) || 'B';
+      
+      const address = row[addressKey] ? String(row[addressKey]).trim() : '';
+      const sparksRaw = String(row[sparksKey] || '0').replace(/,/g, '');
+      const sparks = parseFloat(sparksRaw) || 0;
+      
+      return {
+        address,
+        sparks
+      };
+    })
+    .filter(item => item.address && !isNaN(item.sparks));
   
   if (fullData) {
     return {
@@ -437,26 +502,34 @@ function parseWeek5Sheet(
   console.log("Week 5 raw data (first few rows):", rawData.slice(0, 3));
   
   const skipRows = rawData.length > 0 && 
+                   typeof rawData[0] === 'object' &&
                    Object.values(rawData[0]).some(val => 
                      String(val).toLowerCase().includes('time period')) ? 1 : 0;
   
   const headers = rawData[skipRows] || {};
   console.log(`Week 5 sheet headers:`, headers);
   
-  const formattedData = rawData.slice(skipRows + 1).map((row: any) => {
-    const addressKey = Object.keys(headers).find(
-      key => String(headers[key]).toLowerCase() === 'address'
-    ) || 'A';
-    
-    const sparksKey = Object.keys(headers).find(
-      key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
-    ) || 'B';
-    
-    return {
-      address: String(row[addressKey] || ''),
-      sparks: Number(String(row[sparksKey] || '0').replace(/,/g, '')) || 0
-    };
-  }).filter(item => item.address && !isNaN(item.sparks));
+  const formattedData = rawData.slice(skipRows + 1)
+    .filter(row => row && typeof row === 'object')
+    .map((row: any) => {
+      const addressKey = Object.keys(headers).find(
+        key => String(headers[key]).toLowerCase() === 'address'
+      ) || 'A';
+      
+      const sparksKey = Object.keys(headers).find(
+        key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
+      ) || 'B';
+      
+      const address = row[addressKey] ? String(row[addressKey]).trim() : '';
+      const sparksRaw = String(row[sparksKey] || '0').replace(/,/g, '');
+      const sparks = parseFloat(sparksRaw) || 0;
+      
+      return {
+        address,
+        sparks
+      };
+    })
+    .filter(item => item.address && !isNaN(item.sparks));
   
   if (fullData) {
     return {

@@ -64,12 +64,19 @@ const LeaderboardSection = ({
         const dataToSearch = fullData.length > 0 ? fullData : data;
         
         results = dataToSearch
-          .filter(entry => entry.address.toLowerCase().includes(searchTermLower))
+          .filter(entry => {
+            // Ensure we're dealing with a string for the address
+            const addressStr = String(entry.address || '');
+            // Perform case-insensitive search
+            return addressStr.toLowerCase().includes(searchTermLower);
+          })
           .map((entry, index) => ({
             ...entry,
             rank: dataToSearch.findIndex(e => e.address === entry.address) + 1
           }));
 
+        console.log(`Search for "${searchTerm}" found ${results.length} results`);
+        
         setSearchResults(results);
         setNoResults(results.length === 0);
       } catch (error) {
@@ -89,7 +96,6 @@ const LeaderboardSection = ({
   // Function to truncate address for better display
   const formatAddress = (address: string): string => {
     if (!address) return '';
-    if (address.length <= 12) return address;
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
   };
 
@@ -219,7 +225,7 @@ const LeaderboardSection = ({
                 </span>
               </TooltipTrigger>
               <TooltipContent>
-                <p className="font-mono text-xs">{entry.address}</p>
+                <p className="font-mono text-xs break-all">{entry.address}</p>
               </TooltipContent>
             </Tooltip>
             
