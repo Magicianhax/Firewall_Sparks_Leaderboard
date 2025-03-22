@@ -15,6 +15,7 @@ const Index = () => {
     week2: { data: [], totalPages: 0 },
     week3: { data: [], totalPages: 0 },
     week4: { data: [], totalPages: 0 },
+    week5: { data: [], totalPages: 0 },
   });
 
   useEffect(() => {
@@ -69,6 +70,7 @@ const Index = () => {
           week2Data={leaderboardData.week2}
           week3Data={leaderboardData.week3}
           week4Data={leaderboardData.week4}
+          week5Data={leaderboardData.week5}
           currentPage={currentPage}
           onPageChange={handlePageChange}
         />

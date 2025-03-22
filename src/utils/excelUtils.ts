@@ -26,6 +26,7 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
       week2: parseWeek2Sheet(workbook, 'week 2', page, fullData),
       week3: parseWeek3Sheet(workbook, 'week 3', page, fullData),
       week4: parseWeek4Sheet(workbook, 'week 4', page, fullData),
+      week5: parseWeek5Sheet(workbook, 'week 5', page, fullData),
     };
   } catch (error) {
     console.error('Error reading Excel file:', error);
@@ -49,11 +50,16 @@ function parseOverallSheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // For overall sheet, headers are directly in the first row (index 0)
-  const headers = rawData[0] || {};
+  // Skip the first row if it contains "Time Period"
+  const skipRows = rawData.length > 0 && 
+                   Object.values(rawData[0]).some(val => 
+                     String(val).includes('Time Period')) ? 1 : 0;
+  
+  // Headers are in the row after the time period row (if it exists)
+  const headers = rawData[skipRows] || {};
   console.log(`Overall sheet headers:`, headers);
   
-  const formattedData = rawData.slice(1).map((row: any) => {
+  const formattedData = rawData.slice(skipRows + 1).map((row: any) => {
     const addressKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase() === 'address'
     ) || 'A';
@@ -64,7 +70,7 @@ function parseOverallSheet(
     
     return {
       address: String(row[addressKey] || ''),
-      sparks: Number(row[sparksKey]) || 0
+      sparks: Number(String(row[sparksKey]).replace(/,/g, '')) || 0
     };
   }).filter(item => item.address && !isNaN(item.sparks));
   
@@ -100,11 +106,16 @@ function parseWeek1Sheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // For week 1 sheet, headers are in the first row (index 0)
-  const headers = rawData[0] || {};
+  // Skip the first row if it contains "Time Period"
+  const skipRows = rawData.length > 0 && 
+                   Object.values(rawData[0]).some(val => 
+                     String(val).includes('Time Period')) ? 1 : 0;
+  
+  // Headers are in the row after the time period row (if it exists)
+  const headers = rawData[skipRows] || {};
   console.log(`Week 1 sheet headers:`, headers);
   
-  const formattedData = rawData.slice(1).map((row: any) => {
+  const formattedData = rawData.slice(skipRows + 1).map((row: any) => {
     const addressKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase() === 'address'
     ) || 'A';
@@ -119,7 +130,7 @@ function parseWeek1Sheet(
     
     return {
       address: String(row[addressKey] || ''),
-      sparks: Number(row[sparksKey]) || 0,
+      sparks: Number(String(row[sparksKey]).replace(/,/g, '')) || 0,
       hotSlothVerification: row[verificationKey] ? String(row[verificationKey]) : undefined
     };
   }).filter(item => item.address && !isNaN(item.sparks));
@@ -156,11 +167,16 @@ function parseWeek2Sheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // For week 2 sheet only, skip the time period row, headers are on row 1 (index 1)
-  const headers = rawData[1] || {};
+  // Skip the first row if it contains "Time Period"
+  const skipRows = rawData.length > 0 && 
+                   Object.values(rawData[0]).some(val => 
+                     String(val).includes('Time Period')) ? 1 : 0;
+  
+  // Headers are in the row after the time period row (if it exists)
+  const headers = rawData[skipRows] || {};
   console.log(`Week 2 sheet headers:`, headers);
   
-  const formattedData = rawData.slice(2).map((row: any) => {
+  const formattedData = rawData.slice(skipRows + 1).map((row: any) => {
     const addressKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase() === 'address'
     ) || 'A';
@@ -176,7 +192,7 @@ function parseWeek2Sheet(
     
     return {
       address: String(row[addressKey] || ''),
-      sparks: Number(row[sparksKey]) || 0,
+      sparks: Number(String(row[sparksKey]).replace(/,/g, '')) || 0,
       nftCollection: row[nftKey] ? String(row[nftKey]) : undefined
     };
   }).filter(item => item.address && !isNaN(item.sparks));
@@ -213,11 +229,16 @@ function parseWeek3Sheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // For week 3 sheet, headers are in the first row (index 0)
-  const headers = rawData[0] || {};
+  // Skip the first row if it contains "Time Period"
+  const skipRows = rawData.length > 0 && 
+                   Object.values(rawData[0]).some(val => 
+                     String(val).includes('Time Period')) ? 1 : 0;
+  
+  // Headers are in the row after the time period row (if it exists)
+  const headers = rawData[skipRows] || {};
   console.log(`Week 3 sheet headers:`, headers);
   
-  const formattedData = rawData.slice(1).map((row: any) => {
+  const formattedData = rawData.slice(skipRows + 1).map((row: any) => {
     const addressKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase() === 'address'
     ) || 'A';
@@ -232,7 +253,7 @@ function parseWeek3Sheet(
     
     return {
       address: String(row[addressKey] || ''),
-      sparks: Number(row[sparksKey]) || 0,
+      sparks: Number(String(row[sparksKey]).replace(/,/g, '')) || 0,
       referralBonus: row[referralKey] ? String(row[referralKey]) : undefined
     };
   }).filter(item => item.address && !isNaN(item.sparks));
@@ -269,11 +290,16 @@ function parseWeek4Sheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // For week 4 sheet, headers are in the first row (index 0)
-  const headers = rawData[0] || {};
+  // Skip the first row if it contains "Time Period"
+  const skipRows = rawData.length > 0 && 
+                   Object.values(rawData[0]).some(val => 
+                     String(val).includes('Time Period')) ? 1 : 0;
+  
+  // Headers are in the row after the time period row (if it exists)
+  const headers = rawData[skipRows] || {};
   console.log(`Week 4 sheet headers:`, headers);
   
-  const formattedData = rawData.slice(1).map((row: any) => {
+  const formattedData = rawData.slice(skipRows + 1).map((row: any) => {
     const addressKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase() === 'address'
     ) || 'A';
@@ -284,7 +310,63 @@ function parseWeek4Sheet(
     
     return {
       address: String(row[addressKey] || ''),
-      sparks: Number(row[sparksKey]) || 0
+      sparks: Number(String(row[sparksKey]).replace(/,/g, '')) || 0
+    };
+  }).filter(item => item.address && !isNaN(item.sparks));
+  
+  if (fullData) {
+    return {
+      data: formattedData,
+      totalPages: Math.ceil(formattedData.length / ITEMS_PER_PAGE),
+    };
+  }
+
+  const start = (page - 1) * ITEMS_PER_PAGE;
+  const end = start + ITEMS_PER_PAGE;
+  
+  return {
+    data: formattedData.slice(start, end),
+    totalPages: Math.ceil(formattedData.length / ITEMS_PER_PAGE),
+  };
+}
+
+function parseWeek5Sheet(
+  workbook: XLSX.WorkBook, 
+  sheetName: string, 
+  page: number,
+  fullData: boolean = false
+): LeaderboardResponse {
+  const ITEMS_PER_PAGE = 50;
+  const sheet = workbook.Sheets[sheetName];
+  
+  if (!sheet) {
+    console.error(`Sheet "${sheetName}" not found`);
+    return { data: [], totalPages: 0 };
+  }
+
+  const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
+  
+  // Skip the first row if it contains "Time Period"
+  const skipRows = rawData.length > 0 && 
+                   Object.values(rawData[0]).some(val => 
+                     String(val).includes('Time Period')) ? 1 : 0;
+  
+  // Headers are in the row after the time period row (if it exists)
+  const headers = rawData[skipRows] || {};
+  console.log(`Week 5 sheet headers:`, headers);
+  
+  const formattedData = rawData.slice(skipRows + 1).map((row: any) => {
+    const addressKey = Object.keys(headers).find(
+      key => String(headers[key]).toLowerCase() === 'address'
+    ) || 'A';
+    
+    const sparksKey = Object.keys(headers).find(
+      key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
+    ) || 'B';
+    
+    return {
+      address: String(row[addressKey] || ''),
+      sparks: Number(String(row[sparksKey]).replace(/,/g, '')) || 0
     };
   }).filter(item => item.address && !isNaN(item.sparks));
   
