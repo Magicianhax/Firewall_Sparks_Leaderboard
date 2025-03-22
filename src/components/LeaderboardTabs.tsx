@@ -24,6 +24,7 @@ interface LeaderboardTabsProps {
   week5Data: TabData;
   currentPage: number;
   onPageChange: (page: number) => void;
+  isLoading?: boolean;
 }
 
 const LeaderboardTabs = ({
@@ -34,7 +35,8 @@ const LeaderboardTabs = ({
   week4Data,
   week5Data,
   currentPage,
-  onPageChange
+  onPageChange,
+  isLoading = false
 }: LeaderboardTabsProps) => {
   // Use separate search terms for each tab
   const [overallSearchTerm, setOverallSearchTerm] = React.useState("");
@@ -66,16 +68,20 @@ const LeaderboardTabs = ({
   // Load full data for searching
   useEffect(() => {
     const loadFullData = async () => {
-      const data = await readLeaderboardData(1, true);
-      if (data) {
-        setFullData({
-          overall: data.overall.data,
-          week1: data.week1.data,
-          week2: data.week2.data,
-          week3: data.week3.data,
-          week4: data.week4.data,
-          week5: data.week5.data,
-        });
+      try {
+        const data = await readLeaderboardData(1, true);
+        if (data) {
+          setFullData({
+            overall: data.overall.data,
+            week1: data.week1.data,
+            week2: data.week2.data,
+            week3: data.week3.data,
+            week4: data.week4.data,
+            week5: data.week5.data,
+          });
+        }
+      } catch (error) {
+        console.error("Error loading full data:", error);
       }
     };
     
@@ -117,6 +123,7 @@ const LeaderboardTabs = ({
           onPageChange={onPageChange}
           searchTerm={overallSearchTerm}
           onSearchChange={setOverallSearchTerm}
+          isLoading={isLoading}
         />
       </TabsContent>
       
@@ -130,6 +137,7 @@ const LeaderboardTabs = ({
           onPageChange={onPageChange}
           searchTerm={week1SearchTerm}
           onSearchChange={setWeek1SearchTerm}
+          isLoading={isLoading}
         />
       </TabsContent>
       
@@ -143,6 +151,7 @@ const LeaderboardTabs = ({
           onPageChange={onPageChange}
           searchTerm={week2SearchTerm}
           onSearchChange={setWeek2SearchTerm}
+          isLoading={isLoading}
         />
       </TabsContent>
       
@@ -156,6 +165,7 @@ const LeaderboardTabs = ({
           onPageChange={onPageChange}
           searchTerm={week3SearchTerm}
           onSearchChange={setWeek3SearchTerm}
+          isLoading={isLoading}
         />
       </TabsContent>
       
@@ -169,6 +179,7 @@ const LeaderboardTabs = ({
           onPageChange={onPageChange}
           searchTerm={week4SearchTerm}
           onSearchChange={setWeek4SearchTerm}
+          isLoading={isLoading}
         />
       </TabsContent>
       
@@ -182,6 +193,7 @@ const LeaderboardTabs = ({
           onPageChange={onPageChange}
           searchTerm={week5SearchTerm}
           onSearchChange={setWeek5SearchTerm}
+          isLoading={isLoading}
         />
       </TabsContent>
     </Tabs>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Search, Sparkle } from 'lucide-react';
@@ -26,6 +27,7 @@ interface LeaderboardSectionProps {
   totalPages: number;
   currentPage: number;
   onPageChange: (page: number) => void;
+  isLoading?: boolean;
 }
 
 const LeaderboardSection = ({ 
@@ -36,7 +38,8 @@ const LeaderboardSection = ({
   onSearchChange,
   totalPages,
   currentPage,
-  onPageChange 
+  onPageChange,
+  isLoading = false
 }: LeaderboardSectionProps) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -168,7 +171,7 @@ const LeaderboardSection = ({
   };
 
   const renderContent = () => {
-    if (isSearching) {
+    if (isLoading || isSearching) {
       return Array(5).fill(0).map((_, index) => (
         <div key={index} className="p-4">
           <Skeleton className="h-12 w-full rounded-lg" />
@@ -180,6 +183,14 @@ const LeaderboardSection = ({
       return (
         <div className="p-8 text-center text-muted-foreground">
           No addresses found matching "{searchTerm}"
+        </div>
+      );
+    }
+
+    if (displayData.length === 0) {
+      return (
+        <div className="p-8 text-center text-muted-foreground">
+          No data available
         </div>
       );
     }
