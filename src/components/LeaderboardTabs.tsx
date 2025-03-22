@@ -61,6 +61,9 @@ const LeaderboardTabs = ({
     week5: []
   });
   
+  // State to track available weeks
+  const [availableWeeks, setAvailableWeeks] = useState<number[]>([1, 2, 3, 4]);
+  
   const isMobile = useIsMobile();
 
   // Load full data for searching
@@ -68,6 +71,15 @@ const LeaderboardTabs = ({
     const loadFullData = async () => {
       const data = await readLeaderboardData(1, true);
       if (data) {
+        // Check which weeks have data
+        const weeks = [];
+        if (data.week1.data.length > 0) weeks.push(1);
+        if (data.week2.data.length > 0) weeks.push(2);
+        if (data.week3.data.length > 0) weeks.push(3);
+        if (data.week4.data.length > 0) weeks.push(4);
+        if (data.week5.data.length > 0) weeks.push(5);
+        setAvailableWeeks(weeks);
+        
         setFullData({
           overall: data.overall.data,
           week1: data.week1.data,
@@ -102,11 +114,13 @@ const LeaderboardTabs = ({
         <TabsList className="grid w-full grid-cols-3 gap-1">
           <TabsTrigger value="week3" className="text-sm sm:text-base">W3</TabsTrigger>
           <TabsTrigger value="week4" className="text-sm sm:text-base">W4</TabsTrigger>
-          <TabsTrigger value="week5" className="text-sm sm:text-base">W5</TabsTrigger>
+          {availableWeeks.includes(5) && (
+            <TabsTrigger value="week5" className="text-sm sm:text-base">W5</TabsTrigger>
+          )}
         </TabsList>
       )}
       
-      {!isMobile && (
+      {!isMobile && availableWeeks.includes(5) && (
         <TabsList className="grid w-full grid-cols-1 gap-1">
           <TabsTrigger value="week5" className="text-sm sm:text-base">Week 5</TabsTrigger>
         </TabsList>
@@ -177,18 +191,20 @@ const LeaderboardTabs = ({
         />
       </TabsContent>
       
-      <TabsContent value="week5">
-        <LeaderboardSection
-          title="Week 5 Leaderboard"
-          data={week5Data.data}
-          fullData={fullData.week5}
-          totalPages={week5Data.totalPages}
-          currentPage={currentPage}
-          onPageChange={onPageChange}
-          searchTerm={week5SearchTerm}
-          onSearchChange={setWeek5SearchTerm}
-        />
-      </TabsContent>
+      {availableWeeks.includes(5) && (
+        <TabsContent value="week5">
+          <LeaderboardSection
+            title="Week 5 Leaderboard"
+            data={week5Data.data}
+            fullData={fullData.week5}
+            totalPages={week5Data.totalPages}
+            currentPage={currentPage}
+            onPageChange={onPageChange}
+            searchTerm={week5SearchTerm}
+            onSearchChange={setWeek5SearchTerm}
+          />
+        </TabsContent>
+      )}
     </Tabs>
   );
 };

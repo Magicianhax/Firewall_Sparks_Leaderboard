@@ -32,6 +32,7 @@ const UserBreakdown = () => {
     week5: WeeklyBreakdown;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [availableWeeks, setAvailableWeeks] = useState<number[]>([1, 2, 3, 4]);
 
   useEffect(() => {
     const fetchBreakdown = async () => {
@@ -48,6 +49,15 @@ const UserBreakdown = () => {
           return;
         }
 
+        // Check which weeks have data
+        const weeks = [];
+        if (data.week1.data.length > 0) weeks.push(1);
+        if (data.week2.data.length > 0) weeks.push(2);
+        if (data.week3.data.length > 0) weeks.push(3);
+        if (data.week4.data.length > 0) weeks.push(4);
+        if (data.week5.data.length > 0) weeks.push(5);
+        setAvailableWeeks(weeks);
+        
         const overallData = data.overall.data.find((entry: any) => 
           entry.address.toLowerCase() === address?.toLowerCase()
         );
@@ -77,7 +87,7 @@ const UserBreakdown = () => {
         });
 
         const calculateRank = (data: any[], userAddress: string | undefined) => {
-          if (!userAddress) return undefined;
+          if (!userAddress || !data || data.length === 0) return undefined;
           const userAddressLower = userAddress.toLowerCase();
           const sortedData = [...data].sort((a, b) => b.sparks - a.sparks);
           const index = sortedData.findIndex(entry => entry.address.toLowerCase() === userAddressLower);
@@ -204,10 +214,10 @@ const UserBreakdown = () => {
             <span className="font-mono text-sm sm:text-base break-all">{address}</span>
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <div className="flex items-center">
-                <span className="font-bold text-lg sm:text-xl">{breakdown.overall}</span>
+                <span className="font-bold text-lg sm:text-xl">{breakdown?.overall || 0}</span>
                 <span className="text-yellow-500 ml-1">🔥</span>
               </div>
-              {breakdown.overallRank && (
+              {breakdown?.overallRank && (
                 <div className="flex items-center text-sm">
                   <Trophy className="h-4 w-4 mr-1 text-yellow-600" />
                   <span>Overall Rank: {renderRank(breakdown.overallRank)}</span>
@@ -217,113 +227,123 @@ const UserBreakdown = () => {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Card className="p-4 bg-secondary/50">
-              <h3 className="font-semibold mb-3 flex justify-between items-center">
-                <span>Week 1</span>
-                {breakdown.week1.rank && (
-                  <span className="text-sm flex items-center gap-1">
-                    <Trophy className="h-3 w-3 text-yellow-600" />
-                    Rank: {renderRank(breakdown.week1.rank)}
-                  </span>
-                )}
-              </h3>
-              <div className="space-y-2.5">
-                <div className="flex justify-between items-center">
-                  <span>Sparks</span>
-                  <span className="font-semibold">{breakdown.week1.sparks} 🔥</span>
-                </div>
-                {breakdown.week1.hotSlothVerification && (
-                  <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
-                    <span>Hot Sloth Verification</span>
-                    <span className="break-all">{breakdown.week1.hotSlothVerification}</span>
+            {availableWeeks.includes(1) && (
+              <Card className="p-4 bg-secondary/50">
+                <h3 className="font-semibold mb-3 flex justify-between items-center">
+                  <span>Week 1</span>
+                  {breakdown?.week1.rank && (
+                    <span className="text-sm flex items-center gap-1">
+                      <Trophy className="h-3 w-3 text-yellow-600" />
+                      Rank: {renderRank(breakdown.week1.rank)}
+                    </span>
+                  )}
+                </h3>
+                <div className="space-y-2.5">
+                  <div className="flex justify-between items-center">
+                    <span>Sparks</span>
+                    <span className="font-semibold">{breakdown?.week1.sparks || 0} 🔥</span>
                   </div>
-                )}
-              </div>
-            </Card>
-
-            <Card className="p-4 bg-secondary/50">
-              <h3 className="font-semibold mb-3 flex justify-between items-center">
-                <span>Week 2</span>
-                {breakdown.week2.rank && (
-                  <span className="text-sm flex items-center gap-1">
-                    <Trophy className="h-3 w-3 text-yellow-600" />
-                    Rank: {renderRank(breakdown.week2.rank)}
-                  </span>
-                )}
-              </h3>
-              <div className="space-y-2.5">
-                <div className="flex justify-between items-center">
-                  <span>Sparks</span>
-                  <span className="font-semibold">{breakdown.week2.sparks} 🔥</span>
+                  {breakdown?.week1.hotSlothVerification && (
+                    <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
+                      <span>Hot Sloth Verification</span>
+                      <span className="break-all">{breakdown.week1.hotSlothVerification}</span>
+                    </div>
+                  )}
                 </div>
-                {breakdown.week2.nftCollection && (
-                  <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
-                    <span>NFT Collection</span>
-                    <span className="break-all">{breakdown.week2.nftCollection}</span>
+              </Card>
+            )}
+
+            {availableWeeks.includes(2) && (
+              <Card className="p-4 bg-secondary/50">
+                <h3 className="font-semibold mb-3 flex justify-between items-center">
+                  <span>Week 2</span>
+                  {breakdown?.week2.rank && (
+                    <span className="text-sm flex items-center gap-1">
+                      <Trophy className="h-3 w-3 text-yellow-600" />
+                      Rank: {renderRank(breakdown.week2.rank)}
+                    </span>
+                  )}
+                </h3>
+                <div className="space-y-2.5">
+                  <div className="flex justify-between items-center">
+                    <span>Sparks</span>
+                    <span className="font-semibold">{breakdown?.week2.sparks || 0} 🔥</span>
                   </div>
-                )}
-              </div>
-            </Card>
-
-            <Card className="p-4 bg-secondary/50">
-              <h3 className="font-semibold mb-3 flex justify-between items-center">
-                <span>Week 3</span>
-                {breakdown.week3.rank && (
-                  <span className="text-sm flex items-center gap-1">
-                    <Trophy className="h-3 w-3 text-yellow-600" />
-                    Rank: {renderRank(breakdown.week3.rank)}
-                  </span>
-                )}
-              </h3>
-              <div className="space-y-2.5">
-                <div className="flex justify-between items-center">
-                  <span>Sparks</span>
-                  <span className="font-semibold">{breakdown.week3.sparks} 🔥</span>
+                  {breakdown?.week2.nftCollection && (
+                    <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
+                      <span>NFT Collection</span>
+                      <span className="break-all">{breakdown.week2.nftCollection}</span>
+                    </div>
+                  )}
                 </div>
-                {breakdown.week3.referralBonus && (
-                  <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
-                    <span>Referral Bonus</span>
-                    <span className="break-all">{breakdown.week3.referralBonus}</span>
+              </Card>
+            )}
+
+            {availableWeeks.includes(3) && (
+              <Card className="p-4 bg-secondary/50">
+                <h3 className="font-semibold mb-3 flex justify-between items-center">
+                  <span>Week 3</span>
+                  {breakdown?.week3.rank && (
+                    <span className="text-sm flex items-center gap-1">
+                      <Trophy className="h-3 w-3 text-yellow-600" />
+                      Rank: {renderRank(breakdown.week3.rank)}
+                    </span>
+                  )}
+                </h3>
+                <div className="space-y-2.5">
+                  <div className="flex justify-between items-center">
+                    <span>Sparks</span>
+                    <span className="font-semibold">{breakdown?.week3.sparks || 0} 🔥</span>
                   </div>
-                )}
-              </div>
-            </Card>
-
-            <Card className="p-4 bg-secondary/50">
-              <h3 className="font-semibold mb-3 flex justify-between items-center">
-                <span>Week 4</span>
-                {breakdown.week4.rank && (
-                  <span className="text-sm flex items-center gap-1">
-                    <Trophy className="h-3 w-3 text-yellow-600" />
-                    Rank: {renderRank(breakdown.week4.rank)}
-                  </span>
-                )}
-              </h3>
-              <div className="space-y-2.5">
-                <div className="flex justify-between items-center">
-                  <span>Sparks</span>
-                  <span className="font-semibold">{breakdown.week4.sparks} 🔥</span>
+                  {breakdown?.week3.referralBonus && (
+                    <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
+                      <span>Referral Bonus</span>
+                      <span className="break-all">{String(breakdown.week3.referralBonus)}</span>
+                    </div>
+                  )}
                 </div>
-              </div>
-            </Card>
+              </Card>
+            )}
 
-            <Card className="p-4 bg-secondary/50">
-              <h3 className="font-semibold mb-3 flex justify-between items-center">
-                <span>Week 5</span>
-                {breakdown.week5.rank && (
-                  <span className="text-sm flex items-center gap-1">
-                    <Trophy className="h-3 w-3 text-yellow-600" />
-                    Rank: {renderRank(breakdown.week5.rank)}
-                  </span>
-                )}
-              </h3>
-              <div className="space-y-2.5">
-                <div className="flex justify-between items-center">
-                  <span>Sparks</span>
-                  <span className="font-semibold">{breakdown.week5.sparks} 🔥</span>
+            {availableWeeks.includes(4) && (
+              <Card className="p-4 bg-secondary/50">
+                <h3 className="font-semibold mb-3 flex justify-between items-center">
+                  <span>Week 4</span>
+                  {breakdown?.week4.rank && (
+                    <span className="text-sm flex items-center gap-1">
+                      <Trophy className="h-3 w-3 text-yellow-600" />
+                      Rank: {renderRank(breakdown.week4.rank)}
+                    </span>
+                  )}
+                </h3>
+                <div className="space-y-2.5">
+                  <div className="flex justify-between items-center">
+                    <span>Sparks</span>
+                    <span className="font-semibold">{breakdown?.week4.sparks || 0} 🔥</span>
+                  </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            )}
+
+            {availableWeeks.includes(5) && (
+              <Card className="p-4 bg-secondary/50">
+                <h3 className="font-semibold mb-3 flex justify-between items-center">
+                  <span>Week 5</span>
+                  {breakdown?.week5.rank && (
+                    <span className="text-sm flex items-center gap-1">
+                      <Trophy className="h-3 w-3 text-yellow-600" />
+                      Rank: {renderRank(breakdown.week5.rank)}
+                    </span>
+                  )}
+                </h3>
+                <div className="space-y-2.5">
+                  <div className="flex justify-between items-center">
+                    <span>Sparks</span>
+                    <span className="font-semibold">{breakdown?.week5.sparks || 0} 🔥</span>
+                  </div>
+                </div>
+              </Card>
+            )}
           </div>
 
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t">
@@ -349,9 +369,9 @@ const UserBreakdown = () => {
       <ShareModal 
         open={showShareModal}
         onOpenChange={setShowShareModal}
-        sparks={breakdown.overall || 0}
+        sparks={breakdown?.overall || 0}
         address={address || ''}
-        rank={breakdown.overallRank}
+        rank={breakdown?.overallRank}
       />
     </div>
   );

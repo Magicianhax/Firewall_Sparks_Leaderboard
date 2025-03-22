@@ -20,13 +20,25 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
     const arrayBuffer = await response.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer);
     
+    // Get available sheet names
+    const sheetNames = workbook.SheetNames;
+    console.log("Available sheets in Excel file:", sheetNames);
+    
+    // Determine if week 5 sheet exists
+    const week5SheetName = sheetNames.find(name => 
+      name.toLowerCase() === 'week 5' || 
+      name.toLowerCase() === 'week5'
+    );
+    
     return {
       overall: parseOverallSheet(workbook, 'Firewall_Sparks_Leaderboard', page, fullData),
       week1: parseWeek1Sheet(workbook, 'week 1', page, fullData),
       week2: parseWeek2Sheet(workbook, 'week 2', page, fullData),
       week3: parseWeek3Sheet(workbook, 'week 3', page, fullData),
       week4: parseWeek4Sheet(workbook, 'week 4', page, fullData),
-      week5: parseWeek5Sheet(workbook, 'week 5', page, fullData),
+      week5: week5SheetName ? 
+        parseWeek5Sheet(workbook, week5SheetName, page, fullData) : 
+        { data: [], totalPages: 0 }, // Return empty data if week 5 sheet doesn't exist
     };
   } catch (error) {
     console.error('Error reading Excel file:', error);
