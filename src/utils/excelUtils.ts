@@ -13,6 +13,9 @@ export interface LeaderboardResponse {
   totalPages: number;
 }
 
+// Define ITEMS_PER_PAGE as a constant at the file level so all functions can use it
+const ITEMS_PER_PAGE = 50;
+
 export async function readLeaderboardData(page: number = 1, fullData: boolean = false) {
   try {
     const response = await fetch('/Firewall_Sparks_Leaderboard.xlsx');
@@ -66,7 +69,7 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
 }
 
 function generateBetterMockData(page: number, fullData: boolean) {
-  const ITEMS_PER_PAGE = 50;
+  // Reuse the defined constant here
   const totalItems = 200;
   
   const mockAddresses = [
@@ -226,7 +229,6 @@ function parseWeek1Sheet(
   page: number,
   fullData: boolean = false
 ): LeaderboardResponse {
-  const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
   
   if (!sheet) {
@@ -293,7 +295,6 @@ function parseWeek2Sheet(
   page: number,
   fullData: boolean = false
 ): LeaderboardResponse {
-  const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
   
   if (!sheet) {
@@ -361,7 +362,6 @@ function parseWeek3Sheet(
   page: number,
   fullData: boolean = false
 ): LeaderboardResponse {
-  const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
   
   if (!sheet) {
@@ -428,7 +428,6 @@ function parseWeek4Sheet(
   page: number,
   fullData: boolean = false
 ): LeaderboardResponse {
-  const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
   
   if (!sheet) {
@@ -490,7 +489,6 @@ function parseWeek5Sheet(
   page: number,
   fullData: boolean = false
 ): LeaderboardResponse {
-  const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
   
   if (!sheet) {
