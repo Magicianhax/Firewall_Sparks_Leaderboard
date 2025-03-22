@@ -2,52 +2,32 @@
 import { useEffect, useState } from 'react';
 import LeaderboardTabs from '@/components/LeaderboardTabs';
 import { LeaderboardData, readLeaderboardData } from '@/utils/excelUtils';
-import { useToast } from "@/hooks/use-toast";
-import { Sparkle, LoaderCircle } from 'lucide-react';
+import { useToast } from "@/components/ui/use-toast";
+import { Sparkle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const Index = () => {
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [leaderboardData, setLeaderboardData] = useState({
     overall: { data: [], totalPages: 0 },
     week1: { data: [], totalPages: 0 },
     week2: { data: [], totalPages: 0 },
     week3: { data: [], totalPages: 0 },
     week4: { data: [], totalPages: 0 },
-    week5: { data: [], totalPages: 0 },
   });
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const data = await readLeaderboardData(currentPage);
-        if (data) {
-          setLeaderboardData(data);
-        } else {
-          setError("Failed to load leaderboard data. Please ensure the Excel file is in the correct location.");
-          toast({
-            title: "Error",
-            description: "Failed to load leaderboard data. Please ensure the Excel file is in the correct location.",
-            variant: "destructive",
-          });
-        }
-      } catch (err) {
-        console.error("Error fetching data:", err);
-        setError("An error occurred while loading the leaderboard data");
+      const data = await readLeaderboardData(currentPage);
+      if (data) {
+        setLeaderboardData(data);
+      } else {
         toast({
           title: "Error",
-          description: "An error occurred while loading the leaderboard data",
+          description: "Failed to load leaderboard data. Please ensure the Excel file is in the correct location.",
           variant: "destructive",
         });
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -83,29 +63,15 @@ const Index = () => {
           </a>
         </Card>
 
-        {loading ? (
-          <div className="flex items-center justify-center p-8">
-            <LoaderCircle className="w-8 h-8 text-yellow-500 animate-spin" />
-          </div>
-        ) : error ? (
-          <Alert variant="destructive" className="mb-4">
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>
-              {error}
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <LeaderboardTabs
-            overallData={leaderboardData.overall}
-            week1Data={leaderboardData.week1}
-            week2Data={leaderboardData.week2}
-            week3Data={leaderboardData.week3}
-            week4Data={leaderboardData.week4}
-            week5Data={leaderboardData.week5}
-            currentPage={currentPage}
-            onPageChange={handlePageChange}
-          />
-        )}
+        <LeaderboardTabs
+          overallData={leaderboardData.overall}
+          week1Data={leaderboardData.week1}
+          week2Data={leaderboardData.week2}
+          week3Data={leaderboardData.week3}
+          week4Data={leaderboardData.week4}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+        />
 
         <footer className="text-center text-xs sm:text-sm text-muted-foreground mt-4 sm:mt-8">
           <p className="flex items-center justify-center gap-1">

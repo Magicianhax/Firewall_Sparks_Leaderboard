@@ -4,8 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LeaderboardSection from './LeaderboardSection';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { readLeaderboardData } from '@/utils/excelUtils';
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { LoaderCircle } from "lucide-react";
 
 interface LeaderboardData {
   address: string;
@@ -23,7 +21,6 @@ interface LeaderboardTabsProps {
   week2Data: TabData;
   week3Data: TabData;
   week4Data: TabData;
-  week5Data: TabData;
   currentPage: number;
   onPageChange: (page: number) => void;
 }
@@ -34,7 +31,6 @@ const LeaderboardTabs = ({
   week2Data,
   week3Data,
   week4Data,
-  week5Data,
   currentPage,
   onPageChange
 }: LeaderboardTabsProps) => {
@@ -44,7 +40,6 @@ const LeaderboardTabs = ({
   const [week2SearchTerm, setWeek2SearchTerm] = React.useState("");
   const [week3SearchTerm, setWeek3SearchTerm] = React.useState("");
   const [week4SearchTerm, setWeek4SearchTerm] = React.useState("");
-  const [week5SearchTerm, setWeek5SearchTerm] = React.useState("");
   
   // State to hold full data for searching
   const [fullData, setFullData] = useState<{
@@ -53,85 +48,33 @@ const LeaderboardTabs = ({
     week2: LeaderboardData[];
     week3: LeaderboardData[];
     week4: LeaderboardData[];
-    week5: LeaderboardData[];
   }>({
     overall: [],
     week1: [],
     week2: [],
     week3: [],
-    week4: [],
-    week5: []
+    week4: []
   });
-  
-  // State to track available weeks
-  const [availableWeeks, setAvailableWeeks] = useState<number[]>([1, 2, 3, 4]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   
   const isMobile = useIsMobile();
 
   // Load full data for searching
   useEffect(() => {
     const loadFullData = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const data = await readLeaderboardData(1, true);
-        if (data) {
-          // Check which weeks have data
-          const weeks = [];
-          if (data.week1.data.length > 0) weeks.push(1);
-          if (data.week2.data.length > 0) weeks.push(2);
-          if (data.week3.data.length > 0) weeks.push(3);
-          if (data.week4.data.length > 0) weeks.push(4);
-          if (data.week5.data.length > 0) weeks.push(5);
-          
-          console.log("Available weeks:", weeks);
-          console.log("Week 5 data length:", data.week5.data.length);
-          
-          setAvailableWeeks(weeks);
-          
-          setFullData({
-            overall: data.overall.data,
-            week1: data.week1.data,
-            week2: data.week2.data,
-            week3: data.week3.data,
-            week4: data.week4.data,
-            week5: data.week5.data,
-          });
-        } else {
-          setError("Failed to load leaderboard data");
-        }
-      } catch (err) {
-        console.error("Error in loadFullData:", err);
-        setError("An error occurred while loading the leaderboard data");
-      } finally {
-        setLoading(false);
+      const data = await readLeaderboardData(1, true);
+      if (data) {
+        setFullData({
+          overall: data.overall.data,
+          week1: data.week1.data,
+          week2: data.week2.data,
+          week3: data.week3.data,
+          week4: data.week4.data,
+        });
       }
     };
     
     loadFullData();
   }, []);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <LoaderCircle className="w-8 h-8 text-yellow-500 animate-spin" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <Alert variant="destructive" className="mb-4">
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          {error}. Please try refreshing the page.
-        </AlertDescription>
-      </Alert>
-    );
-  }
 
   return (
     <Tabs defaultValue="overall" className="w-full max-w-4xl mx-auto space-y-4 sm:space-y-6">
@@ -150,18 +93,9 @@ const LeaderboardTabs = ({
       </TabsList>
       
       {isMobile && (
-        <TabsList className="grid w-full grid-cols-3 gap-1">
+        <TabsList className="grid w-full grid-cols-2 gap-1">
           <TabsTrigger value="week3" className="text-sm sm:text-base">W3</TabsTrigger>
           <TabsTrigger value="week4" className="text-sm sm:text-base">W4</TabsTrigger>
-          {availableWeeks.includes(5) && (
-            <TabsTrigger value="week5" className="text-sm sm:text-base">W5</TabsTrigger>
-          )}
-        </TabsList>
-      )}
-      
-      {!isMobile && availableWeeks.includes(5) && (
-        <TabsList className="grid w-full grid-cols-1 gap-1">
-          <TabsTrigger value="week5" className="text-sm sm:text-base">Week 5</TabsTrigger>
         </TabsList>
       )}
       
@@ -229,21 +163,6 @@ const LeaderboardTabs = ({
           onSearchChange={setWeek4SearchTerm}
         />
       </TabsContent>
-      
-      {availableWeeks.includes(5) && (
-        <TabsContent value="week5">
-          <LeaderboardSection
-            title="Week 5 Leaderboard"
-            data={week5Data.data}
-            fullData={fullData.week5}
-            totalPages={week5Data.totalPages}
-            currentPage={currentPage}
-            onPageChange={onPageChange}
-            searchTerm={week5SearchTerm}
-            onSearchChange={setWeek5SearchTerm}
-          />
-        </TabsContent>
-      )}
     </Tabs>
   );
 };

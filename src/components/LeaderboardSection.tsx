@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Search, Sparkle } from 'lucide-react';
@@ -8,7 +7,6 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface LeaderboardEntry {
   address: string;
@@ -64,19 +62,12 @@ const LeaderboardSection = ({
         const dataToSearch = fullData.length > 0 ? fullData : data;
         
         results = dataToSearch
-          .filter(entry => {
-            // Ensure we're dealing with a string for the address
-            const addressStr = String(entry.address || '');
-            // Perform case-insensitive search
-            return addressStr.toLowerCase().includes(searchTermLower);
-          })
+          .filter(entry => entry.address.toLowerCase().includes(searchTermLower))
           .map((entry, index) => ({
             ...entry,
             rank: dataToSearch.findIndex(e => e.address === entry.address) + 1
           }));
 
-        console.log(`Search for "${searchTerm}" found ${results.length} results`);
-        
         setSearchResults(results);
         setNoResults(results.length === 0);
       } catch (error) {
@@ -92,12 +83,6 @@ const LeaderboardSection = ({
   }, [searchTerm, data, fullData]);
 
   const displayData = searchTerm ? searchResults : data;
-
-  // Function to truncate address for better display
-  const formatAddress = (address: string): string => {
-    if (!address) return '';
-    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
-  };
 
   const renderPagination = () => {
     if (searchTerm || totalPages <= 1) return null;
@@ -218,17 +203,9 @@ const LeaderboardSection = ({
             #{entry.rank || index + 1 + ((currentPage - 1) * 50)}
           </span>
           <div className="flex flex-col">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="font-mono hover:text-yellow-600 transition-colors">
-                  {formatAddress(entry.address)}
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-mono text-xs break-all">{entry.address}</p>
-              </TooltipContent>
-            </Tooltip>
-            
+            <span className="font-mono hover:text-yellow-600 transition-colors break-all">
+              {entry.address}
+            </span>
             {entry.nftCollection && (
               <span className="text-sm text-muted-foreground">
                 NFT Collection: {entry.nftCollection}
@@ -247,7 +224,7 @@ const LeaderboardSection = ({
           </div>
         </div>
         <div className="flex items-center gap-2 self-end sm:self-center">
-          <span className="font-semibold">{entry.sparks.toLocaleString()}</span>
+          <span className="font-semibold">{entry.sparks}</span>
           <span className="text-yellow-500">🔥</span>
         </div>
       </div>
