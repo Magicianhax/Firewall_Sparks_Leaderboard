@@ -2,46 +2,32 @@
 import { useEffect, useState } from 'react';
 import LeaderboardTabs from '@/components/LeaderboardTabs';
 import { LeaderboardData, readLeaderboardData } from '@/utils/excelUtils';
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { Sparkle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 const Index = () => {
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(true);
   const [leaderboardData, setLeaderboardData] = useState({
     overall: { data: [], totalPages: 0 },
     week1: { data: [], totalPages: 0 },
     week2: { data: [], totalPages: 0 },
     week3: { data: [], totalPages: 0 },
     week4: { data: [], totalPages: 0 },
-    week5: { data: [], totalPages: 0 },
   });
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
-      try {
-        const data = await readLeaderboardData(currentPage);
-        if (data) {
-          setLeaderboardData(data);
-        } else {
-          toast({
-            title: "Error",
-            description: "Failed to load leaderboard data. Please ensure the Excel file is in the correct location.",
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching leaderboard data:", error);
+      const data = await readLeaderboardData(currentPage);
+      if (data) {
+        setLeaderboardData(data);
+      } else {
         toast({
           title: "Error",
           description: "Failed to load leaderboard data. Please ensure the Excel file is in the correct location.",
           variant: "destructive",
         });
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -83,10 +69,8 @@ const Index = () => {
           week2Data={leaderboardData.week2}
           week3Data={leaderboardData.week3}
           week4Data={leaderboardData.week4}
-          week5Data={leaderboardData.week5}
           currentPage={currentPage}
           onPageChange={handlePageChange}
-          isLoading={loading}
         />
 
         <footer className="text-center text-xs sm:text-sm text-muted-foreground mt-4 sm:mt-8">
