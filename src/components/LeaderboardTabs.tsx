@@ -4,6 +4,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LeaderboardSection from './LeaderboardSection';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { readLeaderboardData } from '@/utils/excelUtils';
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { LoaderCircle } from "lucide-react";
 
 interface LeaderboardData {
   address: string;
@@ -63,36 +65,73 @@ const LeaderboardTabs = ({
   
   // State to track available weeks
   const [availableWeeks, setAvailableWeeks] = useState<number[]>([1, 2, 3, 4]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   const isMobile = useIsMobile();
 
   // Load full data for searching
   useEffect(() => {
     const loadFullData = async () => {
-      const data = await readLeaderboardData(1, true);
-      if (data) {
-        // Check which weeks have data
-        const weeks = [];
-        if (data.week1.data.length > 0) weeks.push(1);
-        if (data.week2.data.length > 0) weeks.push(2);
-        if (data.week3.data.length > 0) weeks.push(3);
-        if (data.week4.data.length > 0) weeks.push(4);
-        if (data.week5.data.length > 0) weeks.push(5);
-        setAvailableWeeks(weeks);
-        
-        setFullData({
-          overall: data.overall.data,
-          week1: data.week1.data,
-          week2: data.week2.data,
-          week3: data.week3.data,
-          week4: data.week4.data,
-          week5: data.week5.data,
-        });
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const data = await readLeaderboardData(1, true);
+        if (data) {
+          // Check which weeks have data
+          const weeks = [];
+          if (data.week1.data.length > 0) weeks.push(1);
+          if (data.week2.data.length > 0) weeks.push(2);
+          if (data.week3.data.length > 0) weeks.push(3);
+          if (data.week4.data.length > 0) weeks.push(4);
+          if (data.week5.data.length > 0) weeks.push(5);
+          
+          console.log("Available weeks:", weeks);
+          console.log("Week 5 data length:", data.week5.data.length);
+          
+          setAvailableWeeks(weeks);
+          
+          setFullData({
+            overall: data.overall.data,
+            week1: data.week1.data,
+            week2: data.week2.data,
+            week3: data.week3.data,
+            week4: data.week4.data,
+            week5: data.week5.data,
+          });
+        } else {
+          setError("Failed to load leaderboard data");
+        }
+      } catch (err) {
+        console.error("Error in loadFullData:", err);
+        setError("An error occurred while loading the leaderboard data");
+      } finally {
+        setLoading(false);
       }
     };
     
     loadFullData();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <LoaderCircle className="w-8 h-8 text-yellow-500 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive" className="mb-4">
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>
+          {error}. Please try refreshing the page.
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <Tabs defaultValue="overall" className="w-full max-w-4xl mx-auto space-y-4 sm:space-y-6">
