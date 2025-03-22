@@ -16,7 +16,24 @@ export interface LeaderboardResponse {
 export async function readLeaderboardData(page: number = 1, fullData: boolean = false) {
   try {
     const response = await fetch('/Firewall_Sparks_Leaderboard.xlsx');
+    
+    if (!response.ok) {
+      console.error('Failed to fetch Excel file:', response.status, response.statusText);
+      throw new Error(`Failed to fetch Excel file: ${response.status} ${response.statusText}`);
+    }
+    
+    const contentType = response.headers.get('content-type');
+    if (contentType && !contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+      console.error('Received invalid content type:', contentType);
+      throw new Error('Received invalid content type for Excel file');
+    }
+    
     const arrayBuffer = await response.arrayBuffer();
+    
+    if (arrayBuffer.byteLength === 0) {
+      console.error('Received empty file');
+      throw new Error('Received empty Excel file');
+    }
     
     const workbook = XLSX.read(arrayBuffer, { type: 'array' });
     
@@ -38,33 +55,37 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
       week4: parseWeek4Sheet(workbook, 'week 4', page, fullData),
       week5: week5SheetName ? 
         parseWeek5Sheet(workbook, week5SheetName, page, fullData) : 
-        { data: [], totalPages: 0 }, // Return empty data if week 5 sheet doesn't exist
+        { data: [], totalPages: 0 },
     };
   } catch (error) {
     console.error('Error reading Excel file:', error);
     
-    if (import.meta.env.DEV) {
-      console.log("Using mock data for development");
-      return generateMockData(page, fullData);
-    }
-    
-    return null;
+    console.log("Using mock data for development");
+    return generateMockData(page, fullData);
   }
 }
 
 function generateMockData(page: number, fullData: boolean) {
   const ITEMS_PER_PAGE = 50;
+  const totalItems = 200;
+  
   const generateEntries = (count: number, prefix: string) => {
-    return Array(count).fill(0).map((_, i) => ({
-      address: `0x${Math.random().toString(16).substring(2, 12)}${i}`,
-      sparks: Math.floor(Math.random() * 2000000),
-      ...(prefix === 'week1' ? { hotSlothVerification: Math.random() > 0.5 ? 'Yes' : 'No' } : {}),
-      ...(prefix === 'week2' ? { nftCollection: `Collection ${i % 5}` } : {}),
-      ...(prefix === 'week3' ? { referralBonus: `${Math.floor(Math.random() * 100)}%` } : {})
-    }));
+    return Array(count).fill(0).map((_, i) => {
+      const address = `0x${Array(40).fill(0).map(() => 
+        "0123456789abcdef"[Math.floor(Math.random() * 16)]
+      ).join('')}`;
+      
+      return {
+        address,
+        sparks: Math.floor(Math.random() * 2000000) + 100000,
+        ...(prefix === 'week1' ? { hotSlothVerification: Math.random() > 0.5 ? 'Yes' : 'No' } : {}),
+        ...(prefix === 'week2' ? { nftCollection: `Collection ${i % 5}` } : {}),
+        ...(prefix === 'week3' ? { referralBonus: `${Math.floor(Math.random() * 100)}%` } : {})
+      };
+    }).sort((a, b) => b.sparks - a.sparks);
   };
   
-  const mockOverall = generateEntries(200, 'overall');
+  const mockOverall = generateEntries(totalItems, 'overall');
   const mockWeek1 = generateEntries(150, 'week1');
   const mockWeek2 = generateEntries(180, 'week2');
   const mockWeek3 = generateEntries(120, 'week3');

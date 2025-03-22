@@ -1,13 +1,13 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, Heart, Share, Trophy } from 'lucide-react';
+import { ArrowLeft, Heart, Share, Trophy, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { readLeaderboardData } from '@/utils/excelUtils';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { ShareModal } from '@/components/ShareModal';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface WeeklyBreakdown {
   sparks: number;
@@ -33,10 +33,15 @@ const UserBreakdown = () => {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [availableWeeks, setAvailableWeeks] = useState<number[]>([1, 2, 3, 4]);
+  const [addressNotFound, setAddressNotFound] = useState(false);
 
   useEffect(() => {
     const fetchBreakdown = async () => {
+      if (!address) return;
+      
       setLoading(true);
+      setAddressNotFound(false);
+      
       try {
         const data = await readLeaderboardData(1, true);
         if (!data) {
@@ -59,22 +64,22 @@ const UserBreakdown = () => {
         setAvailableWeeks(weeks);
         
         const overallData = data.overall.data.find((entry: any) => 
-          entry.address.toLowerCase() === address?.toLowerCase()
+          entry.address.toLowerCase() === address.toLowerCase()
         );
         const week1Data = data.week1.data.find((entry: any) => 
-          entry.address.toLowerCase() === address?.toLowerCase()
+          entry.address.toLowerCase() === address.toLowerCase()
         );
         const week2Data = data.week2.data.find((entry: any) => 
-          entry.address.toLowerCase() === address?.toLowerCase()
+          entry.address.toLowerCase() === address.toLowerCase()
         );
         const week3Data = data.week3.data.find((entry: any) => 
-          entry.address.toLowerCase() === address?.toLowerCase()
+          entry.address.toLowerCase() === address.toLowerCase()
         );
         const week4Data = data.week4.data.find((entry: any) => 
-          entry.address.toLowerCase() === address?.toLowerCase()
+          entry.address.toLowerCase() === address.toLowerCase()
         );
         const week5Data = data.week5.data.find((entry: any) => 
-          entry.address.toLowerCase() === address?.toLowerCase()
+          entry.address.toLowerCase() === address.toLowerCase()
         );
 
         console.log("User data for each week:", {
@@ -85,6 +90,13 @@ const UserBreakdown = () => {
           week4Data,
           week5Data
         });
+
+        // Check if user exists in any dataset
+        if (!overallData && !week1Data && !week2Data && !week3Data && !week4Data && !week5Data) {
+          setAddressNotFound(true);
+          setLoading(false);
+          return;
+        }
 
         const calculateRank = (data: any[], userAddress: string | undefined) => {
           if (!userAddress || !data || data.length === 0) return undefined;
@@ -148,7 +160,11 @@ const UserBreakdown = () => {
     }
   }, [address, toast]);
 
-  if (loading || !breakdown) {
+  const formatNumber = (num: number) => {
+    return num.toLocaleString();
+  };
+
+  if (loading) {
     return (
       <div className="min-h-screen p-3 sm:p-6 bg-gradient-to-br from-yellow-50 to-white dark:from-yellow-900/10 dark:to-background">
         <div className="container mx-auto space-y-4 sm:space-y-6 max-w-4xl">
@@ -163,6 +179,42 @@ const UserBreakdown = () => {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (addressNotFound) {
+    return (
+      <div className="min-h-screen p-3 sm:p-6 bg-gradient-to-br from-yellow-50 to-white dark:from-yellow-900/10 dark:to-background">
+        <div className="container mx-auto space-y-4 sm:space-y-6 max-w-4xl">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/')} 
+            className="hover:bg-yellow-100/50 w-fit"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+          
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Address not found in any leaderboard: {address}
+            </AlertDescription>
+          </Alert>
+          
+          <Card className="p-6">
+            <div className="text-center">
+              <h2 className="text-xl font-semibold mb-4">No Data Available</h2>
+              <p className="text-muted-foreground mb-6">
+                This address doesn't appear in any of our leaderboards yet.
+              </p>
+              <Button onClick={() => navigate('/')}>
+                Return to Leaderboard
+              </Button>
+            </div>
+          </Card>
         </div>
       </div>
     );
@@ -214,7 +266,7 @@ const UserBreakdown = () => {
             <span className="font-mono text-sm sm:text-base break-all">{address}</span>
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <div className="flex items-center">
-                <span className="font-bold text-lg sm:text-xl">{breakdown?.overall || 0}</span>
+                <span className="font-bold text-lg sm:text-xl">{formatNumber(breakdown?.overall || 0)}</span>
                 <span className="text-yellow-500 ml-1">🔥</span>
               </div>
               {breakdown?.overallRank && (
@@ -241,7 +293,7 @@ const UserBreakdown = () => {
                 <div className="space-y-2.5">
                   <div className="flex justify-between items-center">
                     <span>Sparks</span>
-                    <span className="font-semibold">{breakdown?.week1.sparks || 0} 🔥</span>
+                    <span className="font-semibold">{formatNumber(breakdown?.week1.sparks || 0)} 🔥</span>
                   </div>
                   {breakdown?.week1.hotSlothVerification && (
                     <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
@@ -267,7 +319,7 @@ const UserBreakdown = () => {
                 <div className="space-y-2.5">
                   <div className="flex justify-between items-center">
                     <span>Sparks</span>
-                    <span className="font-semibold">{breakdown?.week2.sparks || 0} 🔥</span>
+                    <span className="font-semibold">{formatNumber(breakdown?.week2.sparks || 0)} 🔥</span>
                   </div>
                   {breakdown?.week2.nftCollection && (
                     <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
@@ -293,7 +345,7 @@ const UserBreakdown = () => {
                 <div className="space-y-2.5">
                   <div className="flex justify-between items-center">
                     <span>Sparks</span>
-                    <span className="font-semibold">{breakdown?.week3.sparks || 0} 🔥</span>
+                    <span className="font-semibold">{formatNumber(breakdown?.week3.sparks || 0)} 🔥</span>
                   </div>
                   {breakdown?.week3.referralBonus && (
                     <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
@@ -319,7 +371,7 @@ const UserBreakdown = () => {
                 <div className="space-y-2.5">
                   <div className="flex justify-between items-center">
                     <span>Sparks</span>
-                    <span className="font-semibold">{breakdown?.week4.sparks || 0} 🔥</span>
+                    <span className="font-semibold">{formatNumber(breakdown?.week4.sparks || 0)} 🔥</span>
                   </div>
                 </div>
               </Card>
@@ -339,7 +391,7 @@ const UserBreakdown = () => {
                 <div className="space-y-2.5">
                   <div className="flex justify-between items-center">
                     <span>Sparks</span>
-                    <span className="font-semibold">{breakdown?.week5.sparks || 0} 🔥</span>
+                    <span className="font-semibold">{formatNumber(breakdown?.week5.sparks || 0)} 🔥</span>
                   </div>
                 </div>
               </Card>
@@ -378,3 +430,4 @@ const UserBreakdown = () => {
 };
 
 export default UserBreakdown;
+

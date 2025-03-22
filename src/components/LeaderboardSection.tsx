@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Search, Sparkle } from 'lucide-react';
@@ -7,6 +8,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface LeaderboardEntry {
   address: string;
@@ -83,6 +85,13 @@ const LeaderboardSection = ({
   }, [searchTerm, data, fullData]);
 
   const displayData = searchTerm ? searchResults : data;
+
+  // Function to truncate address for better display
+  const formatAddress = (address: string): string => {
+    if (!address) return '';
+    if (address.length <= 12) return address;
+    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+  };
 
   const renderPagination = () => {
     if (searchTerm || totalPages <= 1) return null;
@@ -203,9 +212,17 @@ const LeaderboardSection = ({
             #{entry.rank || index + 1 + ((currentPage - 1) * 50)}
           </span>
           <div className="flex flex-col">
-            <span className="font-mono hover:text-yellow-600 transition-colors break-all">
-              {entry.address}
-            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="font-mono hover:text-yellow-600 transition-colors">
+                  {formatAddress(entry.address)}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="font-mono text-xs">{entry.address}</p>
+              </TooltipContent>
+            </Tooltip>
+            
             {entry.nftCollection && (
               <span className="text-sm text-muted-foreground">
                 NFT Collection: {entry.nftCollection}
@@ -224,7 +241,7 @@ const LeaderboardSection = ({
           </div>
         </div>
         <div className="flex items-center gap-2 self-end sm:self-center">
-          <span className="font-semibold">{entry.sparks}</span>
+          <span className="font-semibold">{entry.sparks.toLocaleString()}</span>
           <span className="text-yellow-500">🔥</span>
         </div>
       </div>
