@@ -1,12 +1,15 @@
 
 import * as XLSX from 'xlsx';
 
+// Define the items per page constant at the file level
+const ITEMS_PER_PAGE = 50;
+
 export interface LeaderboardData {
   address: string;
   sparks: number;
   nftCollection?: string; // Only for week 2
   hotSlothVerification?: string; // Only for week 1
-  referralBonus?: string; // Only for week 3
+  referralBonus?: string; // Only for week 3, 4, 5
 }
 
 export interface LeaderboardResponse {
@@ -20,17 +23,47 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
     const arrayBuffer = await response.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer);
     
+    // Find the sheet names
+    const overallSheet = findSheet(workbook, ['Leaderboard', 'overall', 'firewall', 'sparks']);
+    const week1Sheet = findSheet(workbook, ['week 1', 'week1']);
+    const week2Sheet = findSheet(workbook, ['week 2', 'week2']);
+    const week3Sheet = findSheet(workbook, ['week 3', 'week3']);
+    const week4Sheet = findSheet(workbook, ['week 4', 'week4']);
+    
     return {
-      overall: parseOverallSheet(workbook, 'Firewall_Sparks_Leaderboard', page, fullData),
-      week1: parseWeek1Sheet(workbook, 'week 1', page, fullData),
-      week2: parseWeek2Sheet(workbook, 'week 2', page, fullData),
-      week3: parseWeek3Sheet(workbook, 'week 3', page, fullData),
-      week4: parseWeek4Sheet(workbook, 'week 4', page, fullData),
+      overall: parseOverallSheet(workbook, overallSheet || 'Leaderboard', page, fullData),
+      week1: parseWeek1Sheet(workbook, week1Sheet || 'week 1', page, fullData),
+      week2: parseWeek2Sheet(workbook, week2Sheet || 'week 2', page, fullData),
+      week3: parseWeek3Sheet(workbook, week3Sheet || 'week 3', page, fullData),
+      week4: parseWeek4Sheet(workbook, week4Sheet || 'week 4', page, fullData),
     };
   } catch (error) {
     console.error('Error reading Excel file:', error);
     return null;
   }
+}
+
+// Helper function to find a sheet by name or keywords
+function findSheet(workbook: XLSX.WorkBook, keywords: string[]): string | null {
+  const sheetNames = workbook.SheetNames;
+  
+  // Try exact match first
+  for (const keyword of keywords) {
+    if (sheetNames.includes(keyword)) {
+      return keyword;
+    }
+  }
+  
+  // Try to find a sheet that contains the keyword
+  for (const sheetName of sheetNames) {
+    for (const keyword of keywords) {
+      if (sheetName.toLowerCase().includes(keyword.toLowerCase())) {
+        return sheetName;
+      }
+    }
+  }
+  
+  return null;
 }
 
 function parseOverallSheet(
@@ -39,7 +72,6 @@ function parseOverallSheet(
   page: number,
   fullData: boolean = false
 ): LeaderboardResponse {
-  const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
   
   if (!sheet) {
@@ -49,11 +81,11 @@ function parseOverallSheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // For overall sheet, headers are directly in the first row (index 0)
-  const headers = rawData[0] || {};
+  // Skip the first row (time period) and use the second row (index 1) as headers
+  const headers = rawData[1] || {};
   console.log(`Overall sheet headers:`, headers);
   
-  const formattedData = rawData.slice(1).map((row: any) => {
+  const formattedData = rawData.slice(2).map((row: any) => {
     const addressKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase() === 'address'
     ) || 'A';
@@ -90,7 +122,6 @@ function parseWeek1Sheet(
   page: number,
   fullData: boolean = false
 ): LeaderboardResponse {
-  const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
   
   if (!sheet) {
@@ -100,17 +131,18 @@ function parseWeek1Sheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // For week 1 sheet, headers are in the first row (index 0)
-  const headers = rawData[0] || {};
+  // Skip the first row (time period) and use the second row (index 1) as headers
+  const headers = rawData[1] || {};
   console.log(`Week 1 sheet headers:`, headers);
   
-  const formattedData = rawData.slice(1).map((row: any) => {
+  const formattedData = rawData.slice(2).map((row: any) => {
     const addressKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase() === 'address'
     ) || 'A';
     
     const verificationKey = Object.keys(headers).find(
-      key => String(headers[key]).toLowerCase().includes('sloth')
+      key => String(headers[key]).toLowerCase().includes('sloth') || 
+             String(headers[key]).toLowerCase().includes('verification')
     ) || 'B';
     
     const sparksKey = Object.keys(headers).find(
@@ -146,7 +178,6 @@ function parseWeek2Sheet(
   page: number,
   fullData: boolean = false
 ): LeaderboardResponse {
-  const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
   
   if (!sheet) {
@@ -156,7 +187,7 @@ function parseWeek2Sheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // For week 2 sheet only, skip the time period row, headers are on row 1 (index 1)
+  // Skip the first row (time period) and use the second row (index 1) as headers
   const headers = rawData[1] || {};
   console.log(`Week 2 sheet headers:`, headers);
   
@@ -203,7 +234,6 @@ function parseWeek3Sheet(
   page: number,
   fullData: boolean = false
 ): LeaderboardResponse {
-  const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
   
   if (!sheet) {
@@ -213,11 +243,11 @@ function parseWeek3Sheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // For week 3 sheet, headers are in the first row (index 0)
-  const headers = rawData[0] || {};
+  // Skip the first row (time period) and use the second row (index 1) as headers
+  const headers = rawData[1] || {};
   console.log(`Week 3 sheet headers:`, headers);
   
-  const formattedData = rawData.slice(1).map((row: any) => {
+  const formattedData = rawData.slice(2).map((row: any) => {
     const addressKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase() === 'address'
     ) || 'A';
@@ -259,7 +289,6 @@ function parseWeek4Sheet(
   page: number,
   fullData: boolean = false
 ): LeaderboardResponse {
-  const ITEMS_PER_PAGE = 50;
   const sheet = workbook.Sheets[sheetName];
   
   if (!sheet) {
@@ -269,11 +298,11 @@ function parseWeek4Sheet(
 
   const rawData = XLSX.utils.sheet_to_json(sheet, { header: 'A' });
   
-  // For week 4 sheet, headers are in the first row (index 0)
-  const headers = rawData[0] || {};
+  // Skip the first row (time period) and use the second row (index 1) as headers
+  const headers = rawData[1] || {};
   console.log(`Week 4 sheet headers:`, headers);
   
-  const formattedData = rawData.slice(1).map((row: any) => {
+  const formattedData = rawData.slice(2).map((row: any) => {
     const addressKey = Object.keys(headers).find(
       key => String(headers[key]).toLowerCase() === 'address'
     ) || 'A';
@@ -282,9 +311,14 @@ function parseWeek4Sheet(
       key => String(headers[key]).includes('Sparks') || String(headers[key]).includes('🔥')
     ) || 'B';
     
+    const referralKey = Object.keys(headers).find(
+      key => String(headers[key]).toLowerCase().includes('referral')
+    ) || 'C';
+    
     return {
       address: String(row[addressKey] || ''),
-      sparks: Number(row[sparksKey]) || 0
+      sparks: Number(row[sparksKey]) || 0,
+      referralBonus: row[referralKey] ? String(row[referralKey]) : undefined
     };
   }).filter(item => item.address && !isNaN(item.sparks));
   
