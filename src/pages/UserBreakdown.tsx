@@ -191,12 +191,12 @@ const UserBreakdown = () => {
 
         <Card className="p-4 bg-yellow-500/10 dark:bg-yellow-500/5 border-yellow-200/50 dark:border-yellow-500/20">
           <a 
-            href="https://wn.nr/m47HKzS" 
+            href="https://wn.nr/Q3hqrJt" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-yellow-800 dark:text-yellow-200 hover:underline flex items-center gap-2"
           >
-            🎉 Week 7 of tasks is now live! Click here to participate
+            🎉 Week 8 of tasks is now live! Click here to participate
           </a>
         </Card>
 
