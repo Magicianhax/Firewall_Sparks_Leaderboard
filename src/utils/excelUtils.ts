@@ -18,19 +18,22 @@ export interface LeaderboardResponse {
 
 export async function readLeaderboardData(page: number = 1, fullData: boolean = false) {
   try {
-    // Use the correct path and specify responseType as arraybuffer
-    const response = await fetch('/Firewall_Sparks_Leaderboard/public/Firewall Sparks Leaderboard.xlsx', {
-      cache: 'no-cache' // Prevent caching issues
+    // Corrected file path - directly to the public folder
+    const response = await fetch('/Firewall Sparks Leaderboard.xlsx', {
+      cache: 'no-store' // Completely prevent caching
     });
     
     if (!response.ok) {
+      console.error(`Failed to fetch Excel file: ${response.status} ${response.statusText}`);
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
     
     const arrayBuffer = await response.arrayBuffer();
+    console.log("Successfully fetched Excel file, size:", arrayBuffer.byteLength);
     
     // Use the correct options for parsing Excel files
-    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+    const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
+    console.log("Parsed workbook, sheets:", workbook.SheetNames);
     
     // Find the sheet names
     const overallSheet = findSheet(workbook, ['Leaderboard', 'overall', 'firewall', 'sparks']);

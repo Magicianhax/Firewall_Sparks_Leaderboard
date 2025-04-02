@@ -105,7 +105,7 @@ const Index = () => {
             <AlertDescription>
               {error}
               <div className="mt-2 text-sm">
-                File path: /Firewall_Sparks_Leaderboard/public/Firewall Sparks Leaderboard.xlsx
+                File path: /Firewall Sparks Leaderboard.xlsx
               </div>
               <Button 
                 variant="outline" 
