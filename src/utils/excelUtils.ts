@@ -22,6 +22,7 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
     // Potential file paths to try in order
     const pathsToTry = [
       customPath, // First try custom path if provided
+      'public/Firewall Sparks Leaderboard.xlsx', // Add the public/ prefix
       '/Firewall Sparks Leaderboard.xlsx',
       '/assets/Firewall Sparks Leaderboard.xlsx',
       './Firewall Sparks Leaderboard.xlsx',

@@ -143,7 +143,7 @@ const Index = () => {
 
                 <form onSubmit={handleCustomPathSubmit} className="mt-4 flex flex-col sm:flex-row gap-2">
                   <Input
-                    placeholder="Custom path to Excel file (e.g., /assets/Firewall Sparks Leaderboard.xlsx)"
+                    placeholder="Custom path to Excel file (e.g., public/Firewall Sparks Leaderboard.xlsx)"
                     value={customPath}
                     onChange={(e) => setCustomPath(e.target.value)}
                     className="flex-1"
