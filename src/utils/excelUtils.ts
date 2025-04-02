@@ -3,6 +3,10 @@ import * as XLSX from 'xlsx';
 // Define the items per page constant at the file level
 const ITEMS_PER_PAGE = 50;
 
+// Google Sheets URL
+const SHEET_ID = '1kAOI4il5v9o9nN7tYuyR1JyM7J42KF1iIsMXZLBR0x4';
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=xlsx`;
+
 export interface LeaderboardData {
   address: string;
   sparks: number;
@@ -18,55 +22,18 @@ export interface LeaderboardResponse {
 
 export async function readLeaderboardData(page: number = 1, fullData: boolean = false) {
   try {
-    // Try multiple possible paths for the Excel file
-    const possiblePaths = [
-      '/Firewall Sparks Leaderboard.xlsx',
-      './Firewall Sparks Leaderboard.xlsx',
-      'Firewall Sparks Leaderboard.xlsx'
-    ];
+    console.log('Fetching data from Google Sheets...');
     
-    let response = null;
-    let successfulPath = '';
-    let lastError = null;
-    
-    // Try each path until one works
-    for (const path of possiblePaths) {
-      try {
-        console.log(`Attempting to fetch Excel file from: ${path}`);
-        const attemptResponse = await fetch(path, {
-          cache: 'no-store',
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          }
-        });
-        
-        if (attemptResponse.ok) {
-          response = attemptResponse;
-          successfulPath = path;
-          console.log(`Successfully fetched Excel file from: ${path}`);
-          break;
-        } else {
-          lastError = `Failed to fetch from ${path}: ${attemptResponse.status} ${attemptResponse.statusText}`;
-          console.error(lastError);
-        }
-      } catch (pathError) {
-        lastError = `Failed to fetch from ${path}: ${pathError.message}`;
-        console.error(lastError);
-      }
+    // Fetch the Excel data from Google Sheets
+    const response = await fetch(SHEET_URL);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch sheet: ${response.status} ${response.statusText}`);
     }
-    
-    if (!response || !response.ok) {
-      console.error('All file paths failed. Could not load Excel file.');
-      console.error('Last error:', lastError);
-      throw new Error(`Could not find the Excel file. Last error: ${lastError}`);
-    }
-    
+
     const arrayBuffer = await response.arrayBuffer();
-    console.log(`Successfully fetched Excel file from ${successfulPath}, size:`, arrayBuffer.byteLength);
-    
-    // Use the correct options for parsing Excel files
+    console.log('Successfully fetched sheet data');
+
+    // Parse the Excel data
     const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
     console.log("Parsed workbook, sheets:", workbook.SheetNames);
     
@@ -91,7 +58,7 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
       week7: parseWeekSheet(workbook, week7Sheet || 'week 7', page, fullData),
     };
   } catch (error) {
-    console.error('Error reading Excel file:', error);
+    console.error('Error reading sheet data:', error);
     return null;
   }
 }

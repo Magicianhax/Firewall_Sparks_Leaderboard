@@ -27,12 +27,13 @@ export default defineConfig(({ mode }) => ({
       output: {
         assetFileNames: (assetInfo) => {
           if (assetInfo.name === 'Firewall Sparks Leaderboard.xlsx') {
-            return 'Firewall Sparks Leaderboard.xlsx';
+            return 'public/Firewall Sparks Leaderboard.xlsx';
           }
           return 'assets/[name]-[hash][extname]';
         }
       }
     }
   },
+  publicDir: 'public',
   base: mode === 'development' ? '/' : '/Firewall_Sparks_Leaderboard/'
 }));
