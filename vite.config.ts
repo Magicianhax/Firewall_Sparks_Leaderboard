@@ -26,9 +26,14 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         assetFileNames: (assetInfo) => {
-          if (assetInfo.name === 'Firewall Sparks Leaderboard.xlsx') {
-            return 'Firewall Sparks Leaderboard.xlsx';
+          const info = assetInfo.name.split('.');
+          const extType = info[info.length - 1];
+          
+          if (/xlsx|xls/i.test(extType)) {
+            // Keep Excel files in their original location without hash
+            return 'assets/[name][extname]';
           }
+          
           return 'assets/[name]-[hash][extname]';
         }
       }

@@ -1,5 +1,6 @@
+
 import * as XLSX from 'xlsx';
-import { getExcelFilePath } from '@/config/fileConfig';
+import { getExcelFilePath, getLocalExcelFilePath } from '@/config/fileConfig';
 
 // Define the items per page constant at the file level
 const ITEMS_PER_PAGE = 50;
@@ -21,9 +22,11 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
   try {
     // Get the file path based on the environment
     const defaultPath = getExcelFilePath();
+    const localPath = getLocalExcelFilePath();
     
-    // Try multiple possible paths for the Excel file, starting with the configured path
+    // Try multiple possible paths for the Excel file, starting with the local path the user specified
     const possiblePaths = [
+      localPath,
       defaultPath,
       '/Firewall Sparks Leaderboard.xlsx',
       './Firewall Sparks Leaderboard.xlsx',
@@ -76,8 +79,14 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
     const arrayBuffer = await response.arrayBuffer();
     console.log(`Successfully fetched Excel file from ${successfulPath}, size:`, arrayBuffer.byteLength);
     
-    // Use the correct options for parsing Excel files
-    const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
+    // Add more detailed logging to help debug the Excel file format
+    // Detect file type based on content
+    const uint8Array = new Uint8Array(arrayBuffer);
+    const fileFormat = detectFileFormat(uint8Array);
+    console.log('Detected file format:', fileFormat);
+    
+    // Use the correct options for parsing Excel files based on detected format
+    const workbook = XLSX.read(uint8Array, { type: 'array' });
     console.log("Parsed workbook, sheets:", workbook.SheetNames);
     
     // Find the sheet names
@@ -104,6 +113,41 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
     console.error('Error reading Excel file:', error);
     return null;
   }
+}
+
+// New helper function to detect file format based on content
+function detectFileFormat(data: Uint8Array): string {
+  // Check for Excel file signatures
+  const excelSignatures = {
+    'xls': [0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1], // Old Excel format
+    'xlsx': [0x50, 0x4B, 0x03, 0x04] // New Excel format (ZIP-based)
+  };
+  
+  // Check for Excel signatures
+  for (const [format, signature] of Object.entries(excelSignatures)) {
+    let matches = true;
+    for (let i = 0; i < signature.length; i++) {
+      if (data[i] !== signature[i]) {
+        matches = false;
+        break;
+      }
+    }
+    if (matches) return format;
+  }
+  
+  // Check if it might be a CSV (text-based format)
+  let isText = true;
+  for (let i = 0; i < Math.min(20, data.length); i++) {
+    // Check if all characters are within text range
+    if (data[i] > 127 && data[i] !== 0x09 && data[i] !== 0x0A && data[i] !== 0x0D) {
+      isText = false;
+      break;
+    }
+  }
+  
+  if (isText) return 'csv';
+  
+  return 'unknown';
 }
 
 // Helper function to find a sheet by name or keywords

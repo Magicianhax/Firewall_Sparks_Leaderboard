@@ -33,5 +33,5 @@ export function getLocalExcelFilePath(): string {
     '/Firewall Sparks Leaderboard.xlsx'
   ];
   
-  return possiblePaths[0];
+  return possiblePaths[3]; // Use 'public/Firewall Sparks Leaderboard.xlsx' as the user mentioned
 }
