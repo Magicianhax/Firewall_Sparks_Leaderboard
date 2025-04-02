@@ -24,11 +24,18 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
       '/Firewall Sparks Leaderboard.xlsx',
       './Firewall Sparks Leaderboard.xlsx',
       'Firewall Sparks Leaderboard.xlsx',
-      '/assets/Firewall Sparks Leaderboard.xlsx'
+      '/assets/Firewall Sparks Leaderboard.xlsx',
+      // Try with URL encoded spaces
+      '/Firewall%20Sparks%20Leaderboard.xlsx',
+      // Try nested public folder path
+      '/public/Firewall Sparks Leaderboard.xlsx',
+      // Try absolute URL if known
+      window.location.origin + '/Firewall Sparks Leaderboard.xlsx'
     ];
     
     let response = null;
     let successfulPath = '';
+    let errorDetails = [];
     
     // Try each path until one works
     for (const path of possiblePaths) {
@@ -48,44 +55,61 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
           successfulPath = path;
           console.log(`Successfully fetched Excel file from: ${path}`);
           break;
+        } else {
+          errorDetails.push(`Path ${path}: ${attemptResponse.status} ${attemptResponse.statusText}`);
         }
       } catch (pathError) {
         console.log(`Failed to fetch from ${path}:`, pathError);
+        errorDetails.push(`Path ${path}: ${pathError instanceof Error ? pathError.message : String(pathError)}`);
       }
     }
     
     if (!response || !response.ok) {
       console.error('All file paths failed. Could not load Excel file.');
-      throw new Error('Could not find the Excel file. Please check file location.');
+      console.error('Error details:', errorDetails);
+      throw new Error(`Could not find the Excel file. Tried paths: ${possiblePaths.join(', ')}. Error details: ${errorDetails.join('; ')}`);
     }
     
     const arrayBuffer = await response.arrayBuffer();
     console.log(`Successfully fetched Excel file from ${successfulPath}, size:`, arrayBuffer.byteLength);
     
-    // Use the correct options for parsing Excel files
-    const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
-    console.log("Parsed workbook, sheets:", workbook.SheetNames);
+    if (arrayBuffer.byteLength === 0) {
+      throw new Error('Excel file is empty (0 bytes)');
+    }
     
-    // Find the sheet names
-    const overallSheet = findSheet(workbook, ['Leaderboard', 'overall', 'firewall', 'sparks']);
-    const week1Sheet = findSheet(workbook, ['week 1', 'week1']);
-    const week2Sheet = findSheet(workbook, ['week 2', 'week2']);
-    const week3Sheet = findSheet(workbook, ['week 3', 'week3']);
-    const week4Sheet = findSheet(workbook, ['week 4', 'week4']);
-    const week5Sheet = findSheet(workbook, ['week 5', 'week5']);
-    const week6Sheet = findSheet(workbook, ['week 6', 'week6']);
-    const week7Sheet = findSheet(workbook, ['week 7', 'week7']);
-    
-    return {
-      overall: parseOverallSheet(workbook, overallSheet || 'Leaderboard', page, fullData),
-      week1: parseWeek1Sheet(workbook, week1Sheet || 'week 1', page, fullData),
-      week2: parseWeek2Sheet(workbook, week2Sheet || 'week 2', page, fullData),
-      week3: parseWeek3Sheet(workbook, week3Sheet || 'week 3', page, fullData),
-      week4: parseWeek4Sheet(workbook, week4Sheet || 'week 4', page, fullData),
-      week5: parseWeek5Sheet(workbook, week5Sheet || 'week 5', page, fullData),
-      week6: parseWeekSheet(workbook, week6Sheet || 'week 6', page, fullData),
-      week7: parseWeekSheet(workbook, week7Sheet || 'week 7', page, fullData),
-    };
+    try {
+      // Use the correct options for parsing Excel files
+      const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
+      console.log("Parsed workbook, sheets:", workbook.SheetNames);
+      
+      if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
+        throw new Error('Excel file has no sheets');
+      }
+      
+      // Find the sheet names
+      const overallSheet = findSheet(workbook, ['Leaderboard', 'overall', 'firewall', 'sparks']);
+      const week1Sheet = findSheet(workbook, ['week 1', 'week1']);
+      const week2Sheet = findSheet(workbook, ['week 2', 'week2']);
+      const week3Sheet = findSheet(workbook, ['week 3', 'week3']);
+      const week4Sheet = findSheet(workbook, ['week 4', 'week4']);
+      const week5Sheet = findSheet(workbook, ['week 5', 'week5']);
+      const week6Sheet = findSheet(workbook, ['week 6', 'week6']);
+      const week7Sheet = findSheet(workbook, ['week 7', 'week7']);
+      
+      return {
+        overall: parseOverallSheet(workbook, overallSheet || 'Leaderboard', page, fullData),
+        week1: parseWeek1Sheet(workbook, week1Sheet || 'week 1', page, fullData),
+        week2: parseWeek2Sheet(workbook, week2Sheet || 'week 2', page, fullData),
+        week3: parseWeek3Sheet(workbook, week3Sheet || 'week 3', page, fullData),
+        week4: parseWeek4Sheet(workbook, week4Sheet || 'week 4', page, fullData),
+        week5: parseWeek5Sheet(workbook, week5Sheet || 'week 5', page, fullData),
+        week6: parseWeekSheet(workbook, week6Sheet || 'week 6', page, fullData),
+        week7: parseWeekSheet(workbook, week7Sheet || 'week 7', page, fullData),
+      };
+    } catch (parseError) {
+      console.error('Excel parsing error:', parseError);
+      throw new Error(`Failed to parse Excel file: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+    }
   } catch (error) {
     console.error('Error reading Excel file:', error);
     return null;
