@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx';
+import { getExcelFilePath } from '@/config/fileConfig';
 
 // Define the items per page constant at the file level
 const ITEMS_PER_PAGE = 50;
@@ -18,10 +19,9 @@ export interface LeaderboardResponse {
 
 export async function readLeaderboardData(page: number = 1, fullData: boolean = false) {
   try {
-    // Use a single, reliable path for the Excel file
-    const filePath = '/Firewall Sparks Leaderboard.xlsx';
-    
+    const filePath = getExcelFilePath();
     console.log(`Attempting to fetch Excel file from: ${filePath}`);
+    
     const response = await fetch(filePath, {
       cache: 'no-store',
       headers: {

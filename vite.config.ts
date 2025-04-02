@@ -21,6 +21,7 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     assetsDir: 'assets',
+    copyPublicDir: true,
     rollupOptions: {
       output: {
         assetFileNames: (assetInfo) => {
