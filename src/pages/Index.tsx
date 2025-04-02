@@ -3,10 +3,11 @@ import { useEffect, useState } from 'react';
 import LeaderboardTabs from '@/components/LeaderboardTabs';
 import { LeaderboardData, readLeaderboardData } from '@/utils/excelUtils';
 import { useToast } from "@/components/ui/use-toast";
-import { Sparkle, AlertTriangle, FileWarning } from 'lucide-react';
+import { Sparkle, AlertTriangle, FileWarning, RefreshCcw } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const Index = () => {
   const { toast } = useToast();
@@ -14,6 +15,7 @@ const Index = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [attemptCount, setAttemptCount] = useState(0);
+  const [customPath, setCustomPath] = useState<string>('');
   const [leaderboardData, setLeaderboardData] = useState({
     overall: { data: [], totalPages: 0 },
     week1: { data: [], totalPages: 0 },
@@ -29,24 +31,34 @@ const Index = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const data = await readLeaderboardData(currentPage);
+        const data = await readLeaderboardData(currentPage, false, customPath || undefined);
         if (data) {
           setLeaderboardData(data);
           setError(null);
+          
+          // If we had a custom path that worked, save it to localStorage for future
+          if (customPath) {
+            localStorage.setItem('excelFilePath', customPath);
+            toast({
+              title: "Success",
+              description: `Successfully loaded data from custom path: ${customPath}`,
+            });
+          }
         } else {
           setError("Failed to load leaderboard data. Please ensure the Excel file is accessible.");
           toast({
             title: "Error",
-            description: "Failed to load leaderboard data. Please ensure the Excel file is accessible.",
+            description: "Failed to load leaderboard data. Please check console for details.",
             variant: "destructive",
           });
         }
       } catch (err) {
         console.error("Error fetching data:", err);
-        setError("An unexpected error occurred. Please try again later.");
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        setError(`Error: ${errorMessage}`);
         toast({
           title: "Error",
-          description: "An unexpected error occurred. Please try again later.",
+          description: "Failed to load data. See details in the error message.",
           variant: "destructive",
         });
       } finally {
@@ -54,8 +66,14 @@ const Index = () => {
       }
     };
 
+    // Check for saved path in localStorage
+    const savedPath = localStorage.getItem('excelFilePath');
+    if (savedPath && !customPath) {
+      setCustomPath(savedPath);
+    }
+
     fetchData();
-  }, [toast, currentPage, attemptCount]);
+  }, [toast, currentPage, attemptCount, customPath]);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
@@ -64,6 +82,11 @@ const Index = () => {
   const handleRetry = () => {
     setError(null);
     setAttemptCount(prev => prev + 1); // This will trigger a re-fetch
+  };
+
+  const handleCustomPathSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAttemptCount(prev => prev + 1); // This will trigger a re-fetch with the new path
   };
 
   return (
@@ -100,22 +123,45 @@ const Index = () => {
             </div>
           </div>
         ) : error ? (
-          <Alert variant="destructive" className="mt-4">
+          <Alert variant="warning" className="mt-4">
             <FileWarning className="h-4 w-4" />
             <AlertTitle>Error Loading Data</AlertTitle>
             <AlertDescription>
-              {error}
-              <div className="mt-2 text-sm">
-                Make sure the Excel file is properly uploaded to the public folder of your hosting service.
+              <div className="space-y-2">
+                <p>{error}</p>
+                
+                <div className="text-sm font-medium mt-2">Troubleshooting steps:</div>
+                <ul className="list-disc pl-5 text-sm space-y-1">
+                  <li>Make sure the Excel file is uploaded to the public folder</li>
+                  <li>The Excel file should be named "Firewall Sparks Leaderboard.xlsx"</li>
+                  <li>Check your server/hosting configuration for file access permissions</li>
+                  <li>Try specifying a custom path to the Excel file below</li>
+                </ul>
+
+                <form onSubmit={handleCustomPathSubmit} className="mt-4 flex flex-col sm:flex-row gap-2">
+                  <Input
+                    placeholder="Custom path to Excel file (e.g., /assets/Firewall Sparks Leaderboard.xlsx)"
+                    value={customPath}
+                    onChange={(e) => setCustomPath(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button type="submit" variant="outline" size="sm">
+                    Try Custom Path
+                  </Button>
+                </form>
+
+                <div className="flex gap-2 mt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleRetry} 
+                    className="flex items-center gap-2"
+                  >
+                    <RefreshCcw className="h-3 w-3" />
+                    Retry Default Path
+                  </Button>
+                </div>
               </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleRetry} 
-                className="mt-2"
-              >
-                Retry
-              </Button>
             </AlertDescription>
           </Alert>
         ) : (
