@@ -30,8 +30,6 @@ const UserBreakdown = () => {
     week3: WeeklyBreakdown;
     week4: WeeklyBreakdown;
     week5: WeeklyBreakdown;
-    week6: WeeklyBreakdown;
-    week7: WeeklyBreakdown;
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -68,12 +66,6 @@ const UserBreakdown = () => {
         const week5Data = data.week5.data.find((entry: any) => 
           entry.address.toLowerCase() === address?.toLowerCase()
         );
-        const week6Data = data.week6.data.find((entry: any) => 
-          entry.address.toLowerCase() === address?.toLowerCase()
-        );
-        const week7Data = data.week7.data.find((entry: any) => 
-          entry.address.toLowerCase() === address?.toLowerCase()
-        );
 
         console.log("User data for each week:", {
           overallData,
@@ -81,9 +73,7 @@ const UserBreakdown = () => {
           week2Data,
           week3Data,
           week4Data,
-          week5Data,
-          week6Data,
-          week7Data
+          week5Data
         });
 
         const calculateRank = (data: any[], userAddress: string | undefined) => {
@@ -100,8 +90,6 @@ const UserBreakdown = () => {
         const week3Rank = calculateRank(data.week3.data, address);
         const week4Rank = calculateRank(data.week4.data, address);
         const week5Rank = calculateRank(data.week5.data, address);
-        const week6Rank = calculateRank(data.week6.data, address);
-        const week7Rank = calculateRank(data.week7.data, address);
 
         const userBreakdown = {
           overall: overallData?.sparks || 0,
@@ -123,7 +111,6 @@ const UserBreakdown = () => {
           },
           week4: {
             sparks: week4Data?.sparks || 0,
-            referralBonus: week4Data?.referralBonus,
             rank: week4Rank,
           },
           week5: {
@@ -131,16 +118,6 @@ const UserBreakdown = () => {
             referralBonus: week5Data?.referralBonus,
             rank: week5Rank,
           },
-          week6: {
-            sparks: week6Data?.sparks || 0,
-            referralBonus: week6Data?.referralBonus,
-            rank: week6Rank,
-          },
-          week7: {
-            sparks: week7Data?.sparks || 0,
-            referralBonus: week7Data?.referralBonus,
-            rank: week7Rank,
-          }
         };
 
         console.log("User breakdown:", userBreakdown);
@@ -240,7 +217,7 @@ const UserBreakdown = () => {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             <Card className="p-4 bg-secondary/50">
               <h3 className="font-semibold mb-3 flex justify-between items-center">
                 <span>Week 1</span>
@@ -328,12 +305,6 @@ const UserBreakdown = () => {
                   <span>Sparks</span>
                   <span className="font-semibold">{breakdown.week4.sparks} 🔥</span>
                 </div>
-                {breakdown.week4.referralBonus && (
-                  <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
-                    <span>Referral Bonus</span>
-                    <span className="break-all">{breakdown.week4.referralBonus}</span>
-                  </div>
-                )}
               </div>
             </Card>
 
@@ -356,54 +327,6 @@ const UserBreakdown = () => {
                   <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
                     <span>Referral Bonus</span>
                     <span className="break-all">{breakdown.week5.referralBonus}</span>
-                  </div>
-                )}
-              </div>
-            </Card>
-            
-            <Card className="p-4 bg-secondary/50">
-              <h3 className="font-semibold mb-3 flex justify-between items-center">
-                <span>Week 6</span>
-                {breakdown.week6.rank && (
-                  <span className="text-sm flex items-center gap-1">
-                    <Trophy className="h-3 w-3 text-yellow-600" />
-                    Rank: {renderRank(breakdown.week6.rank)}
-                  </span>
-                )}
-              </h3>
-              <div className="space-y-2.5">
-                <div className="flex justify-between items-center">
-                  <span>Sparks</span>
-                  <span className="font-semibold">{breakdown.week6.sparks} 🔥</span>
-                </div>
-                {breakdown.week6.referralBonus && (
-                  <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
-                    <span>Referral Bonus</span>
-                    <span className="break-all">{breakdown.week6.referralBonus}</span>
-                  </div>
-                )}
-              </div>
-            </Card>
-
-            <Card className="p-4 bg-secondary/50">
-              <h3 className="font-semibold mb-3 flex justify-between items-center">
-                <span>Week 7</span>
-                {breakdown.week7.rank && (
-                  <span className="text-sm flex items-center gap-1">
-                    <Trophy className="h-3 w-3 text-yellow-600" />
-                    Rank: {renderRank(breakdown.week7.rank)}
-                  </span>
-                )}
-              </h3>
-              <div className="space-y-2.5">
-                <div className="flex justify-between items-center">
-                  <span>Sparks</span>
-                  <span className="font-semibold">{breakdown.week7.sparks} 🔥</span>
-                </div>
-                {breakdown.week7.referralBonus && (
-                  <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
-                    <span>Referral Bonus</span>
-                    <span className="break-all">{breakdown.week7.referralBonus}</span>
                   </div>
                 )}
               </div>

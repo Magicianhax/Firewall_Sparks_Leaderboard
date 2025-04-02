@@ -22,8 +22,6 @@ interface LeaderboardTabsProps {
   week3Data: TabData;
   week4Data: TabData;
   week5Data: TabData;
-  week6Data: TabData;
-  week7Data: TabData;
   currentPage: number;
   onPageChange: (page: number) => void;
 }
@@ -35,8 +33,6 @@ const LeaderboardTabs = ({
   week3Data,
   week4Data,
   week5Data,
-  week6Data,
-  week7Data,
   currentPage,
   onPageChange
 }: LeaderboardTabsProps) => {
@@ -47,8 +43,6 @@ const LeaderboardTabs = ({
   const [week3SearchTerm, setWeek3SearchTerm] = React.useState("");
   const [week4SearchTerm, setWeek4SearchTerm] = React.useState("");
   const [week5SearchTerm, setWeek5SearchTerm] = React.useState("");
-  const [week6SearchTerm, setWeek6SearchTerm] = React.useState("");
-  const [week7SearchTerm, setWeek7SearchTerm] = React.useState("");
   
   // State to hold full data for searching
   const [fullData, setFullData] = useState<{
@@ -58,17 +52,13 @@ const LeaderboardTabs = ({
     week3: LeaderboardData[];
     week4: LeaderboardData[];
     week5: LeaderboardData[];
-    week6: LeaderboardData[];
-    week7: LeaderboardData[];
   }>({
     overall: [],
     week1: [],
     week2: [],
     week3: [],
     week4: [],
-    week5: [],
-    week6: [],
-    week7: []
+    week5: []
   });
   
   const isMobile = useIsMobile();
@@ -85,8 +75,6 @@ const LeaderboardTabs = ({
           week3: data.week3.data,
           week4: data.week4.data,
           week5: data.week5.data,
-          week6: data.week6.data,
-          week7: data.week7.data,
         });
       }
     };
@@ -96,29 +84,26 @@ const LeaderboardTabs = ({
 
   return (
     <Tabs defaultValue="overall" className="w-full max-w-4xl mx-auto space-y-4 sm:space-y-6">
-      <TabsList className="grid w-full grid-cols-4 sm:grid-cols-8 gap-1">
-        <TabsTrigger value="overall" className="text-xs sm:text-base">
+      <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 gap-1">
+        <TabsTrigger value="overall" className="text-sm sm:text-base">
           {isMobile ? "All" : "Overall"}
         </TabsTrigger>
-        <TabsTrigger value="week1" className="text-xs sm:text-base">W1</TabsTrigger>
-        <TabsTrigger value="week2" className="text-xs sm:text-base">W2</TabsTrigger>
-        <TabsTrigger value="week3" className="text-xs sm:text-base">W3</TabsTrigger>
+        <TabsTrigger value="week1" className="text-sm sm:text-base">W1</TabsTrigger>
+        <TabsTrigger value="week2" className="text-sm sm:text-base">W2</TabsTrigger>
         {!isMobile && (
           <>
-            <TabsTrigger value="week4" className="text-xs sm:text-base">Week 4</TabsTrigger>
-            <TabsTrigger value="week5" className="text-xs sm:text-base">Week 5</TabsTrigger>
-            <TabsTrigger value="week6" className="text-xs sm:text-base">Week 6</TabsTrigger>
-            <TabsTrigger value="week7" className="text-xs sm:text-base">Week 7</TabsTrigger>
+            <TabsTrigger value="week3" className="text-sm sm:text-base">Week 3</TabsTrigger>
+            <TabsTrigger value="week4" className="text-sm sm:text-base">Week 4</TabsTrigger>
+            <TabsTrigger value="week5" className="text-sm sm:text-base">Week 5</TabsTrigger>
           </>
         )}
       </TabsList>
       
       {isMobile && (
-        <TabsList className="grid w-full grid-cols-4 gap-1">
-          <TabsTrigger value="week4" className="text-xs sm:text-base">W4</TabsTrigger>
-          <TabsTrigger value="week5" className="text-xs sm:text-base">W5</TabsTrigger>
-          <TabsTrigger value="week6" className="text-xs sm:text-base">W6</TabsTrigger>
-          <TabsTrigger value="week7" className="text-xs sm:text-base">W7</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 gap-1">
+          <TabsTrigger value="week3" className="text-sm sm:text-base">W3</TabsTrigger>
+          <TabsTrigger value="week4" className="text-sm sm:text-base">W4</TabsTrigger>
+          <TabsTrigger value="week5" className="text-sm sm:text-base">W5</TabsTrigger>
         </TabsList>
       )}
       
@@ -197,32 +182,6 @@ const LeaderboardTabs = ({
           onPageChange={onPageChange}
           searchTerm={week5SearchTerm}
           onSearchChange={setWeek5SearchTerm}
-        />
-      </TabsContent>
-
-      <TabsContent value="week6">
-        <LeaderboardSection
-          title="Week 6 Leaderboard"
-          data={week6Data.data}
-          fullData={fullData.week6}
-          totalPages={week6Data.totalPages}
-          currentPage={currentPage}
-          onPageChange={onPageChange}
-          searchTerm={week6SearchTerm}
-          onSearchChange={setWeek6SearchTerm}
-        />
-      </TabsContent>
-
-      <TabsContent value="week7">
-        <LeaderboardSection
-          title="Week 7 Leaderboard"
-          data={week7Data.data}
-          fullData={fullData.week7}
-          totalPages={week7Data.totalPages}
-          currentPage={currentPage}
-          onPageChange={onPageChange}
-          searchTerm={week7SearchTerm}
-          onSearchChange={setWeek7SearchTerm}
         />
       </TabsContent>
     </Tabs>

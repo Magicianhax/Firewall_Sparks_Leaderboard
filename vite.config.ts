@@ -19,18 +19,4 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  build: {
-    assetsDir: 'assets',
-    copyPublicDir: true,
-    rollupOptions: {
-      output: {
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name === 'Firewall Sparks Leaderboard.xlsx') {
-            return 'Firewall Sparks Leaderboard.xlsx';
-          }
-          return 'assets/[name]-[hash][extname]';
-        }
-      }
-    }
-  }
 }));
