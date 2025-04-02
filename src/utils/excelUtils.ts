@@ -1,3 +1,4 @@
+
 import * as XLSX from 'xlsx';
 
 // Define the items per page constant at the file level
@@ -16,32 +17,71 @@ export interface LeaderboardResponse {
   totalPages: number;
 }
 
-export async function readLeaderboardData(page: number = 1, fullData: boolean = false) {
+export async function readLeaderboardData(page: number = 1, fullData: boolean = false, customPath?: string) {
   try {
-    // Use a single, reliable path for the Excel file
-    const filePath = '/Firewall Sparks Leaderboard.xlsx';
+    // Potential file paths to try in order
+    const pathsToTry = [
+      customPath, // First try custom path if provided
+      '/Firewall Sparks Leaderboard.xlsx',
+      '/assets/Firewall Sparks Leaderboard.xlsx',
+      './Firewall Sparks Leaderboard.xlsx',
+      './assets/Firewall Sparks Leaderboard.xlsx',
+      'Firewall Sparks Leaderboard.xlsx'
+    ].filter(Boolean); // Remove undefined entries
     
-    console.log(`Attempting to fetch Excel file from: ${filePath}`);
-    const response = await fetch(filePath, {
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
+    let response;
+    let filePath;
+    let error;
+    
+    // Try each path until we get a successful response
+    for (const path of pathsToTry) {
+      if (!path) continue; // Skip empty paths
+      
+      filePath = path;
+      console.log(`Attempting to fetch Excel file from: ${filePath}`);
+      
+      try {
+        response = await fetch(filePath, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        });
+        
+        if (response.ok) {
+          console.log(`Successfully fetched Excel file from: ${filePath}`);
+          break; // Exit the loop if we get a successful response
+        } else {
+          console.error(`Failed to fetch from ${filePath}. Status: ${response.status}`);
+        }
+      } catch (e) {
+        console.error(`Error fetching from ${filePath}:`, e);
+        error = e;
       }
-    });
+    }
     
-    if (!response.ok) {
-      console.error(`Failed to fetch Excel file. Status: ${response.status}, Status Text: ${response.statusText}`);
-      throw new Error(`Failed to fetch Excel file: ${response.status} ${response.statusText}`);
+    if (!response || !response.ok) {
+      const errorMessage = `Failed to fetch Excel file from any path. Last attempted: ${filePath}. Status: ${response?.status || 'unknown'}`;
+      console.error(errorMessage);
+      throw new Error(errorMessage);
     }
     
     const arrayBuffer = await response.arrayBuffer();
+    if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+      throw new Error('Received empty file. The Excel file may be corrupted or improperly uploaded.');
+    }
+    
     console.log(`Successfully fetched Excel file, size:`, arrayBuffer.byteLength);
     
     // Use the correct options for parsing Excel files
     const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
     console.log("Parsed workbook, sheets:", workbook.SheetNames);
+    
+    if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
+      throw new Error('Invalid Excel file structure. No sheets found in the workbook.');
+    }
     
     // Find the sheet names
     const overallSheet = findSheet(workbook, ['Leaderboard', 'overall', 'firewall', 'sparks']);
@@ -65,7 +105,7 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
     };
   } catch (error) {
     console.error('Error reading Excel file:', error);
-    return null;
+    throw error; // Re-throw to allow the calling code to handle the error
   }
 }
 

@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import LeaderboardTabs from '@/components/LeaderboardTabs';
 import { LeaderboardData, readLeaderboardData } from '@/utils/excelUtils';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Sparkle, AlertTriangle, FileWarning, RefreshCcw } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
@@ -28,20 +28,29 @@ const Index = () => {
   });
 
   useEffect(() => {
+    // Check for saved path in localStorage
+    const savedPath = localStorage.getItem('excelFilePath');
+    if (savedPath && !customPath) {
+      setCustomPath(savedPath);
+    }
+
     const fetchData = async () => {
       setLoading(true);
       try {
-        const data = await readLeaderboardData(currentPage, false, customPath || undefined);
+        // Use custom path if provided, otherwise use the saved path from localStorage
+        const pathToUse = customPath || savedPath || undefined;
+        const data = await readLeaderboardData(currentPage, false, pathToUse);
+        
         if (data) {
           setLeaderboardData(data);
           setError(null);
           
           // If we had a custom path that worked, save it to localStorage for future
-          if (customPath) {
-            localStorage.setItem('excelFilePath', customPath);
+          if (pathToUse) {
+            localStorage.setItem('excelFilePath', pathToUse);
             toast({
               title: "Success",
-              description: `Successfully loaded data from custom path: ${customPath}`,
+              description: `Successfully loaded data from path: ${pathToUse}`,
             });
           }
         } else {
@@ -65,12 +74,6 @@ const Index = () => {
         setLoading(false);
       }
     };
-
-    // Check for saved path in localStorage
-    const savedPath = localStorage.getItem('excelFilePath');
-    if (savedPath && !customPath) {
-      setCustomPath(savedPath);
-    }
 
     fetchData();
   }, [toast, currentPage, attemptCount, customPath]);
