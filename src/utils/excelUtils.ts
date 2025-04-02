@@ -17,20 +17,36 @@ export interface LeaderboardResponse {
   totalPages: number;
 }
 
-export async function readLeaderboardData(page: number = 1, fullData: boolean = false) {
+export async function readLeaderboardData(page: number = 1, fullData: boolean = false, customPath?: string) {
   try {
-    // Try multiple possible paths for the Excel file
-    const possiblePaths = [
+    let possiblePaths = [];
+    
+    // If a custom path is provided, try it first
+    if (customPath) {
+      possiblePaths.push(customPath);
+    }
+    
+    // Add all the default paths
+    possiblePaths = [
+      ...possiblePaths,
+      // Absolute paths 
       '/Firewall Sparks Leaderboard.xlsx',
+      // Path relative to document base
       './Firewall Sparks Leaderboard.xlsx',
+      // Check in public folder
+      '/public/Firewall Sparks Leaderboard.xlsx',
+      // Check in root
       'Firewall Sparks Leaderboard.xlsx',
+      // Check in assets folder
       '/assets/Firewall Sparks Leaderboard.xlsx',
       // Try with URL encoded spaces
       '/Firewall%20Sparks%20Leaderboard.xlsx',
-      // Try nested public folder path
-      '/public/Firewall Sparks Leaderboard.xlsx',
-      // Try absolute URL if known
-      window.location.origin + '/Firewall Sparks Leaderboard.xlsx'
+      // Try with special characters fixed
+      '/FirewallSparksLeaderboard.xlsx',
+      // Try with domain name
+      window.location.origin + '/Firewall Sparks Leaderboard.xlsx',
+      // Full URL with protocol
+      window.location.protocol + '//' + window.location.host + '/Firewall Sparks Leaderboard.xlsx'
     ];
     
     let response = null;
@@ -112,7 +128,7 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
     }
   } catch (error) {
     console.error('Error reading Excel file:', error);
-    return null;
+    throw error; // Re-throw to show detailed error to user
   }
 }
 
