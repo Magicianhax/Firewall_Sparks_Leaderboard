@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import LeaderboardTabs from '@/components/LeaderboardTabs';
 import { LeaderboardData, readLeaderboardData } from '@/utils/excelUtils';
@@ -37,11 +36,7 @@ const Index = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Use custom path if provided, otherwise use the saved path from localStorage
-        const pathToUse = customPath || savedPath;
-        
-        // Fix: Modify the function signature to match excelUtils.ts
-        // We need to update the excelUtils.ts file to handle the path parameter
+        console.log(`Fetching data for page ${currentPage}`);
         const data = await readLeaderboardData(currentPage);
         
         if (data) {
@@ -49,11 +44,11 @@ const Index = () => {
           setError(null);
           
           // If we had a custom path that worked, save it to localStorage for future
-          if (pathToUse) {
-            localStorage.setItem('excelFilePath', pathToUse);
+          if (customPath) {
+            localStorage.setItem('excelFilePath', customPath);
             toast({
               title: "Success",
-              description: `Successfully loaded data from path: ${pathToUse}`,
+              description: `Successfully loaded data from path: ${customPath}`,
             });
           }
         } else {
