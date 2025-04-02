@@ -38,8 +38,9 @@ const Index = () => {
       setLoading(true);
       try {
         // Use custom path if provided, otherwise use the saved path from localStorage
-        const pathToUse = customPath || savedPath || undefined;
-        const data = await readLeaderboardData(currentPage, false, pathToUse);
+        const pathToUse = customPath || savedPath;
+        // Update the function call to match the expected signature
+        const data = await readLeaderboardData(currentPage, pathToUse);
         
         if (data) {
           setLeaderboardData(data);
