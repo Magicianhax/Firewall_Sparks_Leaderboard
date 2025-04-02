@@ -1,23 +1,19 @@
-// Configuration for file paths
-export const EXCEL_FILE_PATH = '/assets/Firewall Sparks Leaderboard.xlsx';
 
-// Function to get the correct file path based on environment
+// Configuration for file paths and URLs
+
+// Google Sheets document ID
+export const GOOGLE_SHEET_ID = '1kAOI4il5v9o9nN7tYuyR1JyM7J42KF1iIsMXZLBR0x4';
+
+// Function to get the spreadsheet URL
+export function getGoogleSheetUrl(): string {
+  return `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv`;
+}
+
+// Legacy functions kept for compatibility during transition
 export function getExcelFilePath(): string {
-  // Get the current URL path
-  const currentPath = window.location.pathname;
-  
-  // If we're in a subdirectory (e.g., /Firewall_Sparks_Leaderboard/), adjust the path
-  if (currentPath.includes('/Firewall_Sparks_Leaderboard/')) {
-    return '/Firewall_Sparks_Leaderboard/assets/Firewall Sparks Leaderboard.xlsx';
-  }
-  
-  // Try multiple possible paths
-  const possiblePaths = [
-    '/assets/Firewall Sparks Leaderboard.xlsx',
-    './assets/Firewall Sparks Leaderboard.xlsx',
-    'assets/Firewall Sparks Leaderboard.xlsx'
-  ];
-  
-  // Return the first path
-  return possiblePaths[0];
-} 
+  return getGoogleSheetUrl();
+}
+
+export function getLocalExcelFilePath(): string {
+  return getGoogleSheetUrl();
+}

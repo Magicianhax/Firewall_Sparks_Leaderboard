@@ -76,6 +76,7 @@ const LeaderboardTabs = ({
   // Load full data for searching
   useEffect(() => {
     const loadFullData = async () => {
+      // Fix: Pass true as the second parameter for fullData
       const data = await readLeaderboardData(1, true);
       if (data) {
         setFullData({
