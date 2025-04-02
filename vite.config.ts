@@ -22,16 +22,17 @@ export default defineConfig(({ mode }) => ({
   build: {
     assetsDir: 'assets',
     copyPublicDir: true,
+    outDir: 'dist',
     rollupOptions: {
       output: {
         assetFileNames: (assetInfo) => {
           if (assetInfo.name === 'Firewall Sparks Leaderboard.xlsx') {
-            return 'assets/Firewall Sparks Leaderboard.xlsx';
+            return 'Firewall Sparks Leaderboard.xlsx';
           }
           return 'assets/[name]-[hash][extname]';
         }
       }
     }
   },
-  base: '/Firewall_Sparks_Leaderboard/'
+  base: mode === 'development' ? '/' : '/Firewall_Sparks_Leaderboard/'
 }));

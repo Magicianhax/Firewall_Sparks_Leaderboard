@@ -14,7 +14,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename="/Firewall_Sparks_Leaderboard">
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/user/:address" element={<UserBreakdown />} />
