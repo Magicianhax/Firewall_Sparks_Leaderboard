@@ -3,14 +3,16 @@ import { useEffect, useState } from 'react';
 import LeaderboardTabs from '@/components/LeaderboardTabs';
 import { LeaderboardData, readLeaderboardData } from '@/utils/excelUtils';
 import { useToast } from "@/components/ui/use-toast";
-import { Sparkle, AlertTriangle } from 'lucide-react';
+import { Sparkle, AlertTriangle, FileWarning } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [leaderboardData, setLeaderboardData] = useState({
     overall: { data: [], totalPages: 0 },
     week1: { data: [], totalPages: 0 },
@@ -24,6 +26,7 @@ const Index = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const data = await readLeaderboardData(currentPage);
         if (data) {
@@ -45,6 +48,8 @@ const Index = () => {
           description: "An unexpected error occurred. Please try again later.",
           variant: "destructive",
         });
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -53,6 +58,11 @@ const Index = () => {
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
+  };
+  
+  const handleRetry = () => {
+    setError(null);
+    setCurrentPage(currentPage); // This will trigger a re-fetch
   };
 
   return (
@@ -80,15 +90,31 @@ const Index = () => {
           </a>
         </Card>
 
-        {error ? (
+        {loading ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-pulse flex gap-2 items-center">
+              <div className="h-4 w-4 bg-yellow-500 rounded-full"></div>
+              <div className="h-4 w-4 bg-yellow-500 rounded-full"></div>
+              <div className="h-4 w-4 bg-yellow-500 rounded-full"></div>
+            </div>
+          </div>
+        ) : error ? (
           <Alert variant="destructive" className="mt-4">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
+            <FileWarning className="h-4 w-4" />
+            <AlertTitle>Error Loading Data</AlertTitle>
             <AlertDescription>
               {error}
               <div className="mt-2 text-sm">
                 File path: /Firewall_Sparks_Leaderboard/public/Firewall Sparks Leaderboard.xlsx
               </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRetry} 
+                className="mt-2"
+              >
+                Retry
+              </Button>
             </AlertDescription>
           </Alert>
         ) : (

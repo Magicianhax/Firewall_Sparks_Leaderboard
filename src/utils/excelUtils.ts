@@ -1,4 +1,3 @@
-
 import * as XLSX from 'xlsx';
 
 // Define the items per page constant at the file level
@@ -19,10 +18,19 @@ export interface LeaderboardResponse {
 
 export async function readLeaderboardData(page: number = 1, fullData: boolean = false) {
   try {
-    // Updated file path to match the correct location
-    const response = await fetch('/Firewall_Sparks_Leaderboard/public/Firewall Sparks Leaderboard.xlsx');
+    // Use the correct path and specify responseType as arraybuffer
+    const response = await fetch('/Firewall_Sparks_Leaderboard/public/Firewall Sparks Leaderboard.xlsx', {
+      cache: 'no-cache' // Prevent caching issues
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    
     const arrayBuffer = await response.arrayBuffer();
-    const workbook = XLSX.read(arrayBuffer);
+    
+    // Use the correct options for parsing Excel files
+    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
     
     // Find the sheet names
     const overallSheet = findSheet(workbook, ['Leaderboard', 'overall', 'firewall', 'sparks']);
