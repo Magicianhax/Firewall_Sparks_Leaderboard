@@ -1,3 +1,4 @@
+
 import * as XLSX from 'xlsx';
 
 // Define the items per page constant at the file level
@@ -18,7 +19,8 @@ export interface LeaderboardResponse {
 
 export async function readLeaderboardData(page: number = 1, fullData: boolean = false) {
   try {
-    const response = await fetch('/Firewall_Sparks_Leaderboard.xlsx');
+    // Updated file path to match the correct location
+    const response = await fetch('/Firewall_Sparks_Leaderboard/public/Firewall Sparks Leaderboard.xlsx');
     const arrayBuffer = await response.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer);
     

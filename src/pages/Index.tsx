@@ -3,12 +3,14 @@ import { useEffect, useState } from 'react';
 import LeaderboardTabs from '@/components/LeaderboardTabs';
 import { LeaderboardData, readLeaderboardData } from '@/utils/excelUtils';
 import { useToast } from "@/components/ui/use-toast";
-import { Sparkle } from 'lucide-react';
+import { Sparkle, AlertTriangle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const Index = () => {
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
+  const [error, setError] = useState<string | null>(null);
   const [leaderboardData, setLeaderboardData] = useState({
     overall: { data: [], totalPages: 0 },
     week1: { data: [], totalPages: 0 },
@@ -22,13 +24,25 @@ const Index = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await readLeaderboardData(currentPage);
-      if (data) {
-        setLeaderboardData(data);
-      } else {
+      try {
+        const data = await readLeaderboardData(currentPage);
+        if (data) {
+          setLeaderboardData(data);
+          setError(null);
+        } else {
+          setError("Failed to load leaderboard data. Please ensure the Excel file is in the correct location.");
+          toast({
+            title: "Error",
+            description: "Failed to load leaderboard data. Please ensure the Excel file is in the correct location.",
+            variant: "destructive",
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError("An unexpected error occurred. Please try again later.");
         toast({
           title: "Error",
-          description: "Failed to load leaderboard data. Please ensure the Excel file is in the correct location.",
+          description: "An unexpected error occurred. Please try again later.",
           variant: "destructive",
         });
       }
@@ -66,18 +80,31 @@ const Index = () => {
           </a>
         </Card>
 
-        <LeaderboardTabs
-          overallData={leaderboardData.overall}
-          week1Data={leaderboardData.week1}
-          week2Data={leaderboardData.week2}
-          week3Data={leaderboardData.week3}
-          week4Data={leaderboardData.week4}
-          week5Data={leaderboardData.week5}
-          week6Data={leaderboardData.week6}
-          week7Data={leaderboardData.week7}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-        />
+        {error ? (
+          <Alert variant="destructive" className="mt-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              {error}
+              <div className="mt-2 text-sm">
+                File path: /Firewall_Sparks_Leaderboard/public/Firewall Sparks Leaderboard.xlsx
+              </div>
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <LeaderboardTabs
+            overallData={leaderboardData.overall}
+            week1Data={leaderboardData.week1}
+            week2Data={leaderboardData.week2}
+            week3Data={leaderboardData.week3}
+            week4Data={leaderboardData.week4}
+            week5Data={leaderboardData.week5}
+            week6Data={leaderboardData.week6}
+            week7Data={leaderboardData.week7}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+          />
+        )}
 
         <footer className="text-center text-xs sm:text-sm text-muted-foreground mt-4 sm:mt-8">
           <p className="flex items-center justify-center gap-1">
