@@ -13,6 +13,7 @@ const Index = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [attemptCount, setAttemptCount] = useState(0);
   const [leaderboardData, setLeaderboardData] = useState({
     overall: { data: [], totalPages: 0 },
     week1: { data: [], totalPages: 0 },
@@ -33,10 +34,10 @@ const Index = () => {
           setLeaderboardData(data);
           setError(null);
         } else {
-          setError("Failed to load leaderboard data. Please ensure the Excel file is in the correct location.");
+          setError("Failed to load leaderboard data. Please ensure the Excel file is accessible.");
           toast({
             title: "Error",
-            description: "Failed to load leaderboard data. Please ensure the Excel file is in the correct location.",
+            description: "Failed to load leaderboard data. Please ensure the Excel file is accessible.",
             variant: "destructive",
           });
         }
@@ -54,7 +55,7 @@ const Index = () => {
     };
 
     fetchData();
-  }, [toast, currentPage]);
+  }, [toast, currentPage, attemptCount]);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
@@ -62,7 +63,7 @@ const Index = () => {
   
   const handleRetry = () => {
     setError(null);
-    setCurrentPage(currentPage); // This will trigger a re-fetch
+    setAttemptCount(prev => prev + 1); // This will trigger a re-fetch
   };
 
   return (
@@ -105,7 +106,7 @@ const Index = () => {
             <AlertDescription>
               {error}
               <div className="mt-2 text-sm">
-                File path: /Firewall Sparks Leaderboard.xlsx
+                Make sure the Excel file is properly uploaded to the public folder of your hosting service.
               </div>
               <Button 
                 variant="outline" 

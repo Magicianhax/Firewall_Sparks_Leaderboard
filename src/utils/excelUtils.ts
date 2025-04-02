@@ -1,3 +1,4 @@
+
 import * as XLSX from 'xlsx';
 
 // Define the items per page constant at the file level
@@ -18,18 +19,48 @@ export interface LeaderboardResponse {
 
 export async function readLeaderboardData(page: number = 1, fullData: boolean = false) {
   try {
-    // Corrected file path - directly to the public folder
-    const response = await fetch('/Firewall Sparks Leaderboard.xlsx', {
-      cache: 'no-store' // Completely prevent caching
-    });
+    // Try multiple possible paths for the Excel file
+    const possiblePaths = [
+      '/Firewall Sparks Leaderboard.xlsx',
+      './Firewall Sparks Leaderboard.xlsx',
+      'Firewall Sparks Leaderboard.xlsx',
+      '/assets/Firewall Sparks Leaderboard.xlsx'
+    ];
     
-    if (!response.ok) {
-      console.error(`Failed to fetch Excel file: ${response.status} ${response.statusText}`);
-      throw new Error(`HTTP error! Status: ${response.status}`);
+    let response = null;
+    let successfulPath = '';
+    
+    // Try each path until one works
+    for (const path of possiblePaths) {
+      try {
+        console.log(`Attempting to fetch Excel file from: ${path}`);
+        const attemptResponse = await fetch(path, {
+          cache: 'no-store', // Completely prevent caching
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        });
+        
+        if (attemptResponse.ok) {
+          response = attemptResponse;
+          successfulPath = path;
+          console.log(`Successfully fetched Excel file from: ${path}`);
+          break;
+        }
+      } catch (pathError) {
+        console.log(`Failed to fetch from ${path}:`, pathError);
+      }
+    }
+    
+    if (!response || !response.ok) {
+      console.error('All file paths failed. Could not load Excel file.');
+      throw new Error('Could not find the Excel file. Please check file location.');
     }
     
     const arrayBuffer = await response.arrayBuffer();
-    console.log("Successfully fetched Excel file, size:", arrayBuffer.byteLength);
+    console.log(`Successfully fetched Excel file from ${successfulPath}, size:`, arrayBuffer.byteLength);
     
     // Use the correct options for parsing Excel files
     const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
