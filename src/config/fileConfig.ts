@@ -4,9 +4,14 @@
 // Google Sheets document ID
 export const GOOGLE_SHEET_ID = '1kAOI4il5v9o9nN7tYuyR1JyM7J42KF1iIsMXZLBR0x4';
 
-// Function to get the spreadsheet URL
+// Function to get the spreadsheet URL for CSV export
 export function getGoogleSheetUrl(): string {
-  return `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv`;
+  return `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/export?format=xlsx`;
+}
+
+// Function to get the spreadsheet URL for direct editing
+export function getGoogleSheetEditUrl(): string {
+  return `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/edit?usp=sharing`;
 }
 
 // Legacy functions kept for compatibility during transition

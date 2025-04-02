@@ -1,3 +1,4 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -25,15 +26,13 @@ export default defineConfig(({ mode }) => ({
     outDir: 'dist',
     rollupOptions: {
       output: {
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name === 'Firewall Sparks Leaderboard.xlsx') {
-            return 'public/Firewall Sparks Leaderboard.xlsx';
-          }
-          return 'assets/[name]-[hash][extname]';
-        }
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
       }
     }
   },
   publicDir: 'public',
-  base: mode === 'development' ? '/' : '/Firewall_Sparks_Leaderboard/'
+  // For GitHub Pages, we need to use a relative path instead of Firewall_Sparks_Leaderboard/
+  base: mode === 'development' ? '/' : './'
 }));
