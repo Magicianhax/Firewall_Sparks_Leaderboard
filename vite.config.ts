@@ -32,5 +32,6 @@ export default defineConfig(({ mode }) => ({
         }
       }
     }
-  }
+  },
+  base: '/Firewall_Sparks_Leaderboard/'
 }));
