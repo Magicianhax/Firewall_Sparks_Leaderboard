@@ -2,13 +2,20 @@
 import { useEffect, useState } from 'react';
 import LeaderboardTabs from '@/components/LeaderboardTabs';
 import { LeaderboardData, readLeaderboardData } from '@/utils/excelUtils';
-import { useToast } from "@/components/ui/use-toast";
-import { Sparkle } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+import { Sparkle, AlertTriangle, FileWarning, RefreshCcw } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const Index = () => {
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [attemptCount, setAttemptCount] = useState(0);
+  const [customPath, setCustomPath] = useState<string>('');
   const [leaderboardData, setLeaderboardData] = useState({
     overall: { data: [], totalPages: 0 },
     week1: { data: [], totalPages: 0 },
@@ -16,27 +23,73 @@ const Index = () => {
     week3: { data: [], totalPages: 0 },
     week4: { data: [], totalPages: 0 },
     week5: { data: [], totalPages: 0 },
+    week6: { data: [], totalPages: 0 },
+    week7: { data: [], totalPages: 0 },
   });
 
   useEffect(() => {
+    // Check for saved path in localStorage
+    const savedPath = localStorage.getItem('excelFilePath');
+    if (savedPath && !customPath) {
+      setCustomPath(savedPath);
+    }
+
     const fetchData = async () => {
-      const data = await readLeaderboardData(currentPage);
-      if (data) {
-        setLeaderboardData(data);
-      } else {
+      setLoading(true);
+      try {
+        // Use custom path if provided, otherwise use the saved path from localStorage
+        const pathToUse = customPath || savedPath || undefined;
+        const data = await readLeaderboardData(currentPage, false, pathToUse);
+        
+        if (data) {
+          setLeaderboardData(data);
+          setError(null);
+          
+          // If we had a custom path that worked, save it to localStorage for future
+          if (pathToUse) {
+            localStorage.setItem('excelFilePath', pathToUse);
+            toast({
+              title: "Success",
+              description: `Successfully loaded data from path: ${pathToUse}`,
+            });
+          }
+        } else {
+          setError("Failed to load leaderboard data. Please ensure the Excel file is accessible.");
+          toast({
+            title: "Error",
+            description: "Failed to load leaderboard data. Please check console for details.",
+            variant: "destructive",
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        setError(`Error: ${errorMessage}`);
         toast({
           title: "Error",
-          description: "Failed to load leaderboard data. Please ensure the Excel file is in the correct location.",
+          description: "Failed to load data. See details in the error message.",
           variant: "destructive",
         });
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, [toast, currentPage]);
+  }, [toast, currentPage, attemptCount, customPath]);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
+  };
+  
+  const handleRetry = () => {
+    setError(null);
+    setAttemptCount(prev => prev + 1); // This will trigger a re-fetch
+  };
+
+  const handleCustomPathSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAttemptCount(prev => prev + 1); // This will trigger a re-fetch with the new path
   };
 
   return (
@@ -64,16 +117,70 @@ const Index = () => {
           </a>
         </Card>
 
-        <LeaderboardTabs
-          overallData={leaderboardData.overall}
-          week1Data={leaderboardData.week1}
-          week2Data={leaderboardData.week2}
-          week3Data={leaderboardData.week3}
-          week4Data={leaderboardData.week4}
-          week5Data={leaderboardData.week5}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-        />
+        {loading ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-pulse flex gap-2 items-center">
+              <div className="h-4 w-4 bg-yellow-500 rounded-full"></div>
+              <div className="h-4 w-4 bg-yellow-500 rounded-full"></div>
+              <div className="h-4 w-4 bg-yellow-500 rounded-full"></div>
+            </div>
+          </div>
+        ) : error ? (
+          <Alert variant="warning" className="mt-4">
+            <FileWarning className="h-4 w-4" />
+            <AlertTitle>Error Loading Data</AlertTitle>
+            <AlertDescription>
+              <div className="space-y-2">
+                <p>{error}</p>
+                
+                <div className="text-sm font-medium mt-2">Troubleshooting steps:</div>
+                <ul className="list-disc pl-5 text-sm space-y-1">
+                  <li>Make sure the Excel file is uploaded to the public folder</li>
+                  <li>The Excel file should be named "Firewall Sparks Leaderboard.xlsx"</li>
+                  <li>Check your server/hosting configuration for file access permissions</li>
+                  <li>Try specifying a custom path to the Excel file below</li>
+                </ul>
+
+                <form onSubmit={handleCustomPathSubmit} className="mt-4 flex flex-col sm:flex-row gap-2">
+                  <Input
+                    placeholder="Custom path to Excel file (e.g., public/Firewall Sparks Leaderboard.xlsx)"
+                    value={customPath}
+                    onChange={(e) => setCustomPath(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button type="submit" variant="outline" size="sm">
+                    Try Custom Path
+                  </Button>
+                </form>
+
+                <div className="flex gap-2 mt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleRetry} 
+                    className="flex items-center gap-2"
+                  >
+                    <RefreshCcw className="h-3 w-3" />
+                    Retry Default Path
+                  </Button>
+                </div>
+              </div>
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <LeaderboardTabs
+            overallData={leaderboardData.overall}
+            week1Data={leaderboardData.week1}
+            week2Data={leaderboardData.week2}
+            week3Data={leaderboardData.week3}
+            week4Data={leaderboardData.week4}
+            week5Data={leaderboardData.week5}
+            week6Data={leaderboardData.week6}
+            week7Data={leaderboardData.week7}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+          />
+        )}
 
         <footer className="text-center text-xs sm:text-sm text-muted-foreground mt-4 sm:mt-8">
           <p className="flex items-center justify-center gap-1">
