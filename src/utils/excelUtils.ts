@@ -1,6 +1,5 @@
-
 import * as XLSX from 'xlsx';
-import { getExcelFilePath, getLocalExcelFilePath } from '@/config/fileConfig';
+import { getGoogleSheetUrl } from '@/config/fileConfig';
 
 // Define the items per page constant at the file level
 const ITEMS_PER_PAGE = 50;
@@ -20,134 +19,62 @@ export interface LeaderboardResponse {
 
 export async function readLeaderboardData(page: number = 1, fullData: boolean = false) {
   try {
-    // Get the file path based on the environment
-    const defaultPath = getExcelFilePath();
-    const localPath = getLocalExcelFilePath();
+    // Get the Google Sheets URL
+    const googleSheetUrl = getGoogleSheetUrl();
     
-    // Try multiple possible paths for the Excel file, starting with the local path the user specified
-    const possiblePaths = [
-      localPath,
-      defaultPath,
-      '/Firewall Sparks Leaderboard.xlsx',
-      './Firewall Sparks Leaderboard.xlsx',
-      'Firewall Sparks Leaderboard.xlsx',
-      '/assets/Firewall Sparks Leaderboard.xlsx',
-      './assets/Firewall Sparks Leaderboard.xlsx',
-      'assets/Firewall Sparks Leaderboard.xlsx',
-      '/Firewall_Sparks_Leaderboard/assets/Firewall Sparks Leaderboard.xlsx',
-      '/Firewall_Sparks_Leaderboard/Firewall Sparks Leaderboard.xlsx'
-    ];
+    console.log(`Attempting to fetch Google Sheet from: ${googleSheetUrl}`);
     
-    let response = null;
-    let successfulPath = '';
-    let lastError = null;
-    
-    // Try each path until one works
-    for (const path of possiblePaths) {
-      try {
-        console.log(`Attempting to fetch Excel file from: ${path}`);
-        const attemptResponse = await fetch(path, {
-          cache: 'no-store',
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          }
-        });
-        
-        if (attemptResponse.ok) {
-          response = attemptResponse;
-          successfulPath = path;
-          console.log(`Successfully fetched Excel file from: ${path}`);
-          break;
-        } else {
-          lastError = `Failed to fetch from ${path}: ${attemptResponse.status} ${attemptResponse.statusText}`;
-          console.error(lastError);
+    try {
+      // Fetch the Google Sheet data
+      const response = await fetch(googleSheetUrl, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         }
-      } catch (pathError) {
-        lastError = `Failed to fetch from ${path}: ${pathError.message}`;
-        console.error(lastError);
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch Google Sheet: ${response.status} ${response.statusText}`);
       }
+      
+      const data = await response.text();
+      console.log(`Successfully fetched Google Sheet data, size:`, data.length);
+      
+      // Parse the CSV data into a workbook
+      const workbook = XLSX.read(data, { type: 'string' });
+      console.log("Parsed workbook, sheets:", workbook.SheetNames);
+      
+      // Find the sheet names
+      const sheetNames = workbook.SheetNames;
+      const overallSheet = sheetNames[0] || 'Leaderboard';
+      const week1Sheet = findSheet(workbook, ['week 1', 'week1']) || (sheetNames[1] || 'week 1');
+      const week2Sheet = findSheet(workbook, ['week 2', 'week2']) || (sheetNames[2] || 'week 2');
+      const week3Sheet = findSheet(workbook, ['week 3', 'week3']) || (sheetNames[3] || 'week 3');
+      const week4Sheet = findSheet(workbook, ['week 4', 'week4']) || (sheetNames[4] || 'week 4');
+      const week5Sheet = findSheet(workbook, ['week 5', 'week5']) || (sheetNames[5] || 'week 5');
+      const week6Sheet = findSheet(workbook, ['week 6', 'week6']) || (sheetNames[6] || 'week 6');
+      const week7Sheet = findSheet(workbook, ['week 7', 'week7']) || (sheetNames[7] || 'week 7');
+      
+      return {
+        overall: parseOverallSheet(workbook, overallSheet, page, fullData),
+        week1: parseWeek1Sheet(workbook, week1Sheet, page, fullData),
+        week2: parseWeek2Sheet(workbook, week2Sheet, page, fullData),
+        week3: parseWeek3Sheet(workbook, week3Sheet, page, fullData),
+        week4: parseWeek4Sheet(workbook, week4Sheet, page, fullData),
+        week5: parseWeek5Sheet(workbook, week5Sheet, page, fullData),
+        week6: parseWeekSheet(workbook, week6Sheet, page, fullData),
+        week7: parseWeekSheet(workbook, week7Sheet, page, fullData),
+      };
+    } catch (err) {
+      console.error("Error fetching Google Sheet:", err);
+      throw err;
     }
-    
-    if (!response || !response.ok) {
-      console.error('All file paths failed. Could not load Excel file.');
-      console.error('Last error:', lastError);
-      throw new Error(`Could not find the Excel file. Last error: ${lastError}`);
-    }
-    
-    const arrayBuffer = await response.arrayBuffer();
-    console.log(`Successfully fetched Excel file from ${successfulPath}, size:`, arrayBuffer.byteLength);
-    
-    // Add more detailed logging to help debug the Excel file format
-    // Detect file type based on content
-    const uint8Array = new Uint8Array(arrayBuffer);
-    const fileFormat = detectFileFormat(uint8Array);
-    console.log('Detected file format:', fileFormat);
-    
-    // Use the correct options for parsing Excel files based on detected format
-    const workbook = XLSX.read(uint8Array, { type: 'array' });
-    console.log("Parsed workbook, sheets:", workbook.SheetNames);
-    
-    // Find the sheet names
-    const overallSheet = findSheet(workbook, ['Leaderboard', 'overall', 'firewall', 'sparks']);
-    const week1Sheet = findSheet(workbook, ['week 1', 'week1']);
-    const week2Sheet = findSheet(workbook, ['week 2', 'week2']);
-    const week3Sheet = findSheet(workbook, ['week 3', 'week3']);
-    const week4Sheet = findSheet(workbook, ['week 4', 'week4']);
-    const week5Sheet = findSheet(workbook, ['week 5', 'week5']);
-    const week6Sheet = findSheet(workbook, ['week 6', 'week6']);
-    const week7Sheet = findSheet(workbook, ['week 7', 'week7']);
-    
-    return {
-      overall: parseOverallSheet(workbook, overallSheet || 'Leaderboard', page, fullData),
-      week1: parseWeek1Sheet(workbook, week1Sheet || 'week 1', page, fullData),
-      week2: parseWeek2Sheet(workbook, week2Sheet || 'week 2', page, fullData),
-      week3: parseWeek3Sheet(workbook, week3Sheet || 'week 3', page, fullData),
-      week4: parseWeek4Sheet(workbook, week4Sheet || 'week 4', page, fullData),
-      week5: parseWeek5Sheet(workbook, week5Sheet || 'week 5', page, fullData),
-      week6: parseWeekSheet(workbook, week6Sheet || 'week 6', page, fullData),
-      week7: parseWeekSheet(workbook, week7Sheet || 'week 7', page, fullData),
-    };
   } catch (error) {
-    console.error('Error reading Excel file:', error);
+    console.error('Error reading Google Sheet:', error);
     return null;
   }
-}
-
-// New helper function to detect file format based on content
-function detectFileFormat(data: Uint8Array): string {
-  // Check for Excel file signatures
-  const excelSignatures = {
-    'xls': [0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1], // Old Excel format
-    'xlsx': [0x50, 0x4B, 0x03, 0x04] // New Excel format (ZIP-based)
-  };
-  
-  // Check for Excel signatures
-  for (const [format, signature] of Object.entries(excelSignatures)) {
-    let matches = true;
-    for (let i = 0; i < signature.length; i++) {
-      if (data[i] !== signature[i]) {
-        matches = false;
-        break;
-      }
-    }
-    if (matches) return format;
-  }
-  
-  // Check if it might be a CSV (text-based format)
-  let isText = true;
-  for (let i = 0; i < Math.min(20, data.length); i++) {
-    // Check if all characters are within text range
-    if (data[i] > 127 && data[i] !== 0x09 && data[i] !== 0x0A && data[i] !== 0x0D) {
-      isText = false;
-      break;
-    }
-  }
-  
-  if (isText) return 'csv';
-  
-  return 'unknown';
 }
 
 // Helper function to find a sheet by name or keywords

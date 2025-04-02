@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import LeaderboardTabs from '@/components/LeaderboardTabs';
 import { LeaderboardData, readLeaderboardData } from '@/utils/excelUtils';
@@ -6,7 +7,6 @@ import { Sparkle, AlertTriangle, FileWarning, RefreshCcw } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 const Index = () => {
   const { toast } = useToast();
@@ -14,7 +14,6 @@ const Index = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [attemptCount, setAttemptCount] = useState(0);
-  const [customPath, setCustomPath] = useState<string>('');
   const [leaderboardData, setLeaderboardData] = useState({
     overall: { data: [], totalPages: 0 },
     week1: { data: [], totalPages: 0 },
@@ -27,12 +26,6 @@ const Index = () => {
   });
 
   useEffect(() => {
-    // Check for saved path in localStorage
-    const savedPath = localStorage.getItem('excelFilePath');
-    if (savedPath && !customPath) {
-      setCustomPath(savedPath);
-    }
-
     const fetchData = async () => {
       setLoading(true);
       try {
@@ -42,17 +35,8 @@ const Index = () => {
         if (data) {
           setLeaderboardData(data);
           setError(null);
-          
-          // If we had a custom path that worked, save it to localStorage for future
-          if (customPath) {
-            localStorage.setItem('excelFilePath', customPath);
-            toast({
-              title: "Success",
-              description: `Successfully loaded data from path: ${customPath}`,
-            });
-          }
         } else {
-          setError("Failed to load leaderboard data. Please ensure the Excel file is accessible.");
+          setError("Failed to load leaderboard data. Please ensure the Google Sheet is accessible and shared publicly.");
           toast({
             title: "Error",
             description: "Failed to load leaderboard data. Please check console for details.",
@@ -74,7 +58,7 @@ const Index = () => {
     };
 
     fetchData();
-  }, [toast, currentPage, attemptCount, customPath]);
+  }, [toast, currentPage, attemptCount]);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
@@ -83,11 +67,6 @@ const Index = () => {
   const handleRetry = () => {
     setError(null);
     setAttemptCount(prev => prev + 1); // This will trigger a re-fetch
-  };
-
-  const handleCustomPathSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setAttemptCount(prev => prev + 1); // This will trigger a re-fetch with the new path
   };
 
   return (
@@ -133,23 +112,10 @@ const Index = () => {
                 
                 <div className="text-sm font-medium mt-2">Troubleshooting steps:</div>
                 <ul className="list-disc pl-5 text-sm space-y-1">
-                  <li>Make sure the Excel file is uploaded to the public folder</li>
-                  <li>The Excel file should be named "Firewall Sparks Leaderboard.xlsx"</li>
-                  <li>Check your server/hosting configuration for file access permissions</li>
-                  <li>Try specifying a custom path to the Excel file below</li>
+                  <li>Make sure the Google Sheet is publicly accessible (at least viewable by anyone with the link)</li>
+                  <li>Check your browser's console for more detailed error information</li>
+                  <li>Ensure your internet connection is stable</li>
                 </ul>
-
-                <form onSubmit={handleCustomPathSubmit} className="mt-4 flex flex-col sm:flex-row gap-2">
-                  <Input
-                    placeholder="Custom path to Excel file (e.g., public/Firewall Sparks Leaderboard.xlsx)"
-                    value={customPath}
-                    onChange={(e) => setCustomPath(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button type="submit" variant="outline" size="sm">
-                    Try Custom Path
-                  </Button>
-                </form>
 
                 <div className="flex gap-2 mt-2">
                   <Button 
@@ -159,7 +125,7 @@ const Index = () => {
                     className="flex items-center gap-2"
                   >
                     <RefreshCcw className="h-3 w-3" />
-                    Retry Default Path
+                    Retry Loading Data
                   </Button>
                 </div>
               </div>

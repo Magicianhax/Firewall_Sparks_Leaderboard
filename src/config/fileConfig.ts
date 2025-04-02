@@ -1,37 +1,19 @@
 
-// Configuration for file paths
+// Configuration for file paths and URLs
 
-// Function to get the correct file path based on environment
-export function getExcelFilePath(): string {
-  // Check if we're in development mode
-  const isDevelopment = import.meta.env.MODE === 'development';
-  
-  // Get the base URL from the current window location
-  const baseUrl = window.location.pathname.startsWith('/Firewall_Sparks_Leaderboard')
-    ? '/Firewall_Sparks_Leaderboard'
-    : '';
-  
-  // If in development, use the direct path
-  if (isDevelopment) {
-    console.log('Using development Excel path');
-    return '/assets/Firewall Sparks Leaderboard.xlsx';
-  }
-  
-  // If in production with the subdirectory
-  console.log(`Using production Excel path with base: ${baseUrl}`);
-  return `${baseUrl}/assets/Firewall Sparks Leaderboard.xlsx`;
+// Google Sheets document ID
+export const GOOGLE_SHEET_ID = '1kAOI4il5v9o9nN7tYuyR1JyM7J42KF1iIsMXZLBR0x4';
+
+// Function to get the spreadsheet URL
+export function getGoogleSheetUrl(): string {
+  return `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv`;
 }
 
-// Get file path for local development file testing
+// Legacy functions kept for compatibility during transition
+export function getExcelFilePath(): string {
+  return getGoogleSheetUrl();
+}
+
 export function getLocalExcelFilePath(): string {
-  // Try multiple possible paths
-  const possiblePaths = [
-    '/assets/Firewall Sparks Leaderboard.xlsx',
-    './assets/Firewall Sparks Leaderboard.xlsx',
-    'assets/Firewall Sparks Leaderboard.xlsx',
-    'public/Firewall Sparks Leaderboard.xlsx',
-    '/Firewall Sparks Leaderboard.xlsx'
-  ];
-  
-  return possiblePaths[3]; // Use 'public/Firewall Sparks Leaderboard.xlsx' as the user mentioned
+  return getGoogleSheetUrl();
 }
