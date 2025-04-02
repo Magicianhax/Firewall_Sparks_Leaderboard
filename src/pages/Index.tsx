@@ -39,8 +39,10 @@ const Index = () => {
       try {
         // Use custom path if provided, otherwise use the saved path from localStorage
         const pathToUse = customPath || savedPath;
-        // Update the function call to match the expected signature
-        const data = await readLeaderboardData(currentPage, pathToUse);
+        
+        // Fix: Modify the function signature to match excelUtils.ts
+        // We need to update the excelUtils.ts file to handle the path parameter
+        const data = await readLeaderboardData(currentPage);
         
         if (data) {
           setLeaderboardData(data);
