@@ -2,7 +2,7 @@
 // Configuration for file paths and URLs
 
 // Google Sheets document ID
-export const GOOGLE_SHEET_ID = '1kAOI4il5v9o9nN7tYuyR1JyM7J42KF1iIsMXZLBR0x4';
+export const GOOGLE_SHEET_ID = '1PRTzQknox_fw4WwjIHtKGCLYeQTeDo5UjHoLF9rNX20';
 
 // Function to get the spreadsheet URL for CSV export
 export function getGoogleSheetUrl(): string {

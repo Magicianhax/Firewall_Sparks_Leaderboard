@@ -1,11 +1,12 @@
+
 import * as XLSX from 'xlsx';
+import { GOOGLE_SHEET_ID, getGoogleSheetUrl } from '@/config/fileConfig';
 
 // Define the items per page constant at the file level
 const ITEMS_PER_PAGE = 50;
 
-// Google Sheets URL
-const SHEET_ID = '1kAOI4il5v9o9nN7tYuyR1JyM7J42KF1iIsMXZLBR0x4';
-const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=xlsx`;
+// Google Sheets URL from config
+const SHEET_URL = getGoogleSheetUrl();
 
 export interface LeaderboardData {
   address: string;
