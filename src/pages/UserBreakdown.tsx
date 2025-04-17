@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -32,6 +31,9 @@ const UserBreakdown = () => {
     week5: WeeklyBreakdown;
     week6: WeeklyBreakdown;
     week7: WeeklyBreakdown;
+    week8: WeeklyBreakdown;
+    week9: WeeklyBreakdown;
+    week10: WeeklyBreakdown;
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -74,6 +76,15 @@ const UserBreakdown = () => {
         const week7Data = data.week7.data.find((entry: any) => 
           entry.address.toLowerCase() === address?.toLowerCase()
         );
+        const week8Data = data.week8.data.find((entry: any) => 
+          entry.address.toLowerCase() === address?.toLowerCase()
+        );
+        const week9Data = data.week9.data.find((entry: any) => 
+          entry.address.toLowerCase() === address?.toLowerCase()
+        );
+        const week10Data = data.week10.data.find((entry: any) => 
+          entry.address.toLowerCase() === address?.toLowerCase()
+        );
 
         console.log("User data for each week:", {
           overallData,
@@ -83,7 +94,10 @@ const UserBreakdown = () => {
           week4Data,
           week5Data,
           week6Data,
-          week7Data
+          week7Data,
+          week8Data,
+          week9Data,
+          week10Data
         });
 
         const calculateRank = (data: any[], userAddress: string | undefined) => {
@@ -102,6 +116,9 @@ const UserBreakdown = () => {
         const week5Rank = calculateRank(data.week5.data, address);
         const week6Rank = calculateRank(data.week6.data, address);
         const week7Rank = calculateRank(data.week7.data, address);
+        const week8Rank = calculateRank(data.week8.data, address);
+        const week9Rank = calculateRank(data.week9.data, address);
+        const week10Rank = calculateRank(data.week10.data, address);
 
         const userBreakdown = {
           overall: overallData?.sparks || 0,
@@ -140,6 +157,21 @@ const UserBreakdown = () => {
             sparks: week7Data?.sparks || 0,
             referralBonus: week7Data?.referralBonus,
             rank: week7Rank,
+          },
+          week8: {
+            sparks: week8Data?.sparks || 0,
+            referralBonus: week8Data?.referralBonus,
+            rank: week8Rank,
+          },
+          week9: {
+            sparks: week9Data?.sparks || 0,
+            referralBonus: week9Data?.referralBonus,
+            rank: week9Rank,
+          },
+          week10: {
+            sparks: week10Data?.sparks || 0,
+            referralBonus: week10Data?.referralBonus,
+            rank: week10Rank,
           }
         };
 
@@ -219,7 +251,7 @@ const UserBreakdown = () => {
             rel="noopener noreferrer"
             className="text-yellow-800 dark:text-yellow-200 hover:underline flex items-center gap-2"
           >
-            🎉 Week 9 of tasks is now live! Click here to participate
+            🎉 Week 10 of tasks is now live! Click here to participate
           </a>
         </Card>
 
@@ -228,10 +260,10 @@ const UserBreakdown = () => {
             <span className="font-mono text-sm sm:text-base break-all">{address}</span>
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <div className="flex items-center">
-                <span className="font-bold text-lg sm:text-xl">{breakdown.overall}</span>
+                <span className="font-bold text-lg sm:text-xl">{breakdown?.overall}</span>
                 <span className="text-yellow-500 ml-1">🔥</span>
               </div>
-              {breakdown.overallRank && (
+              {breakdown?.overallRank && (
                 <div className="flex items-center text-sm">
                   <Trophy className="h-4 w-4 mr-1 text-yellow-600" />
                   <span>Overall Rank: {renderRank(breakdown.overallRank)}</span>
@@ -408,6 +440,78 @@ const UserBreakdown = () => {
                 )}
               </div>
             </Card>
+
+            <Card className="p-4 bg-secondary/50">
+              <h3 className="font-semibold mb-3 flex justify-between items-center">
+                <span>Week 8</span>
+                {breakdown.week8.rank && (
+                  <span className="text-sm flex items-center gap-1">
+                    <Trophy className="h-3 w-3 text-yellow-600" />
+                    Rank: {renderRank(breakdown.week8.rank)}
+                  </span>
+                )}
+              </h3>
+              <div className="space-y-2.5">
+                <div className="flex justify-between items-center">
+                  <span>Sparks</span>
+                  <span className="font-semibold">{breakdown.week8.sparks} 🔥</span>
+                </div>
+                {breakdown.week8.referralBonus && (
+                  <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
+                    <span>Referral Bonus</span>
+                    <span className="break-all">{breakdown.week8.referralBonus}</span>
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            <Card className="p-4 bg-secondary/50">
+              <h3 className="font-semibold mb-3 flex justify-between items-center">
+                <span>Week 9</span>
+                {breakdown.week9.rank && (
+                  <span className="text-sm flex items-center gap-1">
+                    <Trophy className="h-3 w-3 text-yellow-600" />
+                    Rank: {renderRank(breakdown.week9.rank)}
+                  </span>
+                )}
+              </h3>
+              <div className="space-y-2.5">
+                <div className="flex justify-between items-center">
+                  <span>Sparks</span>
+                  <span className="font-semibold">{breakdown.week9.sparks} 🔥</span>
+                </div>
+                {breakdown.week9.referralBonus && (
+                  <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
+                    <span>Referral Bonus</span>
+                    <span className="break-all">{breakdown.week9.referralBonus}</span>
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            <Card className="p-4 bg-secondary/50">
+              <h3 className="font-semibold mb-3 flex justify-between items-center">
+                <span>Week 10</span>
+                {breakdown.week10.rank && (
+                  <span className="text-sm flex items-center gap-1">
+                    <Trophy className="h-3 w-3 text-yellow-600" />
+                    Rank: {renderRank(breakdown.week10.rank)}
+                  </span>
+                )}
+              </h3>
+              <div className="space-y-2.5">
+                <div className="flex justify-between items-center">
+                  <span>Sparks</span>
+                  <span className="font-semibold">{breakdown.week10.sparks} 🔥</span>
+                </div>
+                {breakdown.week10.referralBonus && (
+                  <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-sm text-muted-foreground gap-1">
+                    <span>Referral Bonus</span>
+                    <span className="break-all">{breakdown.week10.referralBonus}</span>
+                  </div>
+                )}
+              </div>
+            </Card>
           </div>
 
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t">
@@ -433,9 +537,9 @@ const UserBreakdown = () => {
       <ShareModal 
         open={showShareModal}
         onOpenChange={setShowShareModal}
-        sparks={breakdown.overall || 0}
+        sparks={breakdown?.overall || 0}
         address={address || ''}
-        rank={breakdown.overallRank}
+        rank={breakdown?.overallRank}
       />
     </div>
   );

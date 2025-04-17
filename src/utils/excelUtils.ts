@@ -1,4 +1,3 @@
-
 import * as XLSX from 'xlsx';
 import { GOOGLE_SHEET_ID, getGoogleSheetUrl } from '@/config/fileConfig';
 
@@ -13,7 +12,7 @@ export interface LeaderboardData {
   sparks: number;
   nftCollection?: string; // Only for week 2
   hotSlothVerification?: string; // Only for week 1
-  referralBonus?: string; // Only for week 3, 4, 5
+  referralBonus?: string; // Only for week 3, 4, 5, etc.
 }
 
 export interface LeaderboardResponse {
@@ -47,6 +46,9 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
     const week5Sheet = findSheet(workbook, ['week 5', 'week5']);
     const week6Sheet = findSheet(workbook, ['week 6', 'week6']);
     const week7Sheet = findSheet(workbook, ['week 7', 'week7']);
+    const week8Sheet = findSheet(workbook, ['week 8', 'week8']);
+    const week9Sheet = findSheet(workbook, ['week 9', 'week9']);
+    const week10Sheet = findSheet(workbook, ['week 10', 'week10']);
     
     return {
       overall: parseOverallSheet(workbook, overallSheet || 'Leaderboard', page, fullData),
@@ -57,6 +59,9 @@ export async function readLeaderboardData(page: number = 1, fullData: boolean = 
       week5: parseWeek5Sheet(workbook, week5Sheet || 'week 5', page, fullData),
       week6: parseWeekSheet(workbook, week6Sheet || 'week 6', page, fullData),
       week7: parseWeekSheet(workbook, week7Sheet || 'week 7', page, fullData),
+      week8: parseWeekSheet(workbook, week8Sheet || 'week 8', page, fullData),
+      week9: parseWeekSheet(workbook, week9Sheet || 'week 9', page, fullData),
+      week10: parseWeekSheet(workbook, week10Sheet || 'week 10', page, fullData),
     };
   } catch (error) {
     console.error('Error reading sheet data:', error);
@@ -414,7 +419,7 @@ function parseWeek5Sheet(
   };
 }
 
-// Generic parser function for Week 6 and Week 7
+// Generic parser function for Week 6, Week 7, Week 8, Week 9, and Week 10
 function parseWeekSheet(
   workbook: XLSX.WorkBook, 
   sheetName: string, 
